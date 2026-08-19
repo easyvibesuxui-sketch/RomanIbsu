@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Study at IBSU — International Admission</title>
+<meta name="description" content="International Black Sea University, Tbilisi. 26 degree programmes taught entirely in English across bachelor's, master's and doctoral level. Requirements, documents and how to apply.">
+<meta name="theme-color" content="#060d1a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23071224'/%3E%3Cpath d='M20 6 32 13v14L20 34 8 27V13L20 6Z' fill='none' stroke='%23c9a24d' stroke-width='2'/%3E%3Cpath d='M20 14l6 3.5v7L20 28l-6-3.5v-7L20 14Z' fill='%23ecd08a'/%3E%3C/svg%3E">
+
+<link rel="preload" href="assets/fonts/cormorant-garamond-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/jost-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/fonts.css">
+<link rel="stylesheet" href="assets/css/main.css">
+<link rel="preload" as="image" href="assets/poster/scene-1-garden.jpg">
+</head>
+<body>
+
+<!-- ── atmosphere ───────────────────────────────────────────── -->
+<div class="tessera" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<!-- ── scroll-driven backdrop ───────────────────────────────────
+     Every <video> here is scrubbed by scroll position only.
+     There is deliberately NO autoplay / loop attribute and the
+     script never calls .play() — frames advance because
+     currentTime is written, never because playback runs.
+------------------------------------------------------------- -->
+<div class="stage" id="stage" aria-hidden="true">
+  <div class="scene is-active" data-scene="0">
+    <video playsinline muted disablepictureinpicture preload="none"
+           poster="assets/poster/scene-1-garden.jpg"
+           data-mp4="assets/video/scene-1-garden.mp4"
+           data-webm="assets/video/scene-1-garden.webm"></video>
+  </div>
+  <div class="scene" data-scene="1">
+    <video playsinline muted disablepictureinpicture preload="none"
+           poster="assets/poster/scene-2-academy.jpg"
+           data-mp4="assets/video/scene-2-academy.mp4"
+           data-webm="assets/video/scene-2-academy.webm"></video>
+  </div>
+  <div class="scene" data-scene="2">
+    <video playsinline muted disablepictureinpicture preload="none"
+           poster="assets/poster/scene-3-scroll.jpg"
+           data-mp4="assets/video/scene-3-scroll.mp4"
+           data-webm="assets/video/scene-3-scroll.webm"></video>
+  </div>
+  <div class="scene" data-scene="3">
+    <video playsinline muted disablepictureinpicture preload="none"
+           poster="assets/poster/scene-4-codex.jpg"
+           data-mp4="assets/video/scene-4-codex.mp4"
+           data-webm="assets/video/scene-4-codex.webm"></video>
+  </div>
+  <div class="scene" data-scene="4">
+    <video playsinline muted disablepictureinpicture preload="none"
+           poster="assets/poster/scene-5-path.jpg"
+           data-mp4="assets/video/scene-5-path.mp4"
+           data-webm="assets/video/scene-5-path.webm"></video>
+  </div>
+  <div class="stage__scrim"></div>
+</div>
+
+<!-- ── navigation ───────────────────────────────────────────── -->
+<header class="nav" id="nav">
+  <a class="brand" href="#top">
+    <span class="brand__mark" aria-hidden="true">
+      <svg viewBox="0 0 40 40" fill="none"><path d="M20 3 34.5 11.5v17L20 37 5.5 28.5v-17L20 3Z" stroke="currentColor" stroke-width="1.1"/><path d="M20 11.5 27.5 16v9L20 29.5 12.5 25v-9L20 11.5Z" fill="currentColor" fill-opacity=".22" stroke="currentColor" stroke-width="1.1"/></svg>
+    </span>
+    <span class="brand__text">
+      <b>IBSU</b>
+      <i>International Black Sea University</i>
+    </span>
+  </a>
+
+  <nav class="nav__links" aria-label="Sections">
+    <a href="#why">Why IBSU</a>
+    <a href="#programmes">Programmes</a>
+    <a href="#requirements">Requirements</a>
+    <a href="#apply">Apply</a>
+    <a class="btn btn--gold nav__cta" href="mailto:admissions@ibsu.edu.ge"><span>Start application</span></a>
+  </nav>
+
+  <a class="btn btn--gold btn--sm" href="mailto:admissions@ibsu.edu.ge">
+    <span>Start application</span>
+  </a>
+
+  <button class="nav__toggle" id="navToggle" aria-expanded="false" aria-label="Open menu">
+    <span></span><span></span>
+  </button>
+</header>
+
+<!-- ── golden path progress rail ────────────────────────────── -->
+<aside class="rail" aria-hidden="true">
+  <span class="rail__line"><i id="railFill"></i></span>
+  <ol class="rail__dots">
+    <li data-i="0"><em>I</em></li>
+    <li data-i="1"><em>II</em></li>
+    <li data-i="2"><em>III</em></li>
+    <li data-i="3"><em>IV</em></li>
+    <li data-i="4"><em>V</em></li>
+  </ol>
+</aside>
+
+<main id="top">
+
+<!-- ══ I · THE GARDEN ═══════════════════════════════════════ -->
+<section class="chapter chapter--hero" id="hero" data-scene="0">
+  <div class="shell">
+    <p class="eyebrow reveal" data-d="0">
+      <span class="eyebrow__rule"></span>
+      International Relations Office · Tbilisi, Georgia
+    </p>
+
+    <h1 class="hero__title">
+      <span class="line"><span class="w" style="--i:0">Your</span> <span class="w" style="--i:1">place</span> <span class="w" style="--i:2">in</span></span>
+      <span class="line"><em class="w" style="--i:3">the&nbsp;academy</em></span>
+    </h1>
+
+    <p class="hero__lede reveal" data-d="380">
+      International Black Sea University opens twenty-six degree programmes
+      taught <b>entirely in English</b> — bachelor's, master's and doctoral —
+      to students arriving from across the world.
+    </p>
+
+    <div class="hero__actions reveal" data-d="520">
+      <a class="btn btn--gold" href="#apply"><span>Begin your application</span></a>
+      <a class="btn btn--glass" href="#programmes"><span>Explore programmes</span></a>
+    </div>
+
+    <div class="hero__meta reveal" data-d="660">
+      <div><b>1995</b><i>Founded</i></div>
+      <div><b>26</b><i>English programmes</i></div>
+      <div><b>3</b><i>Degree cycles</i></div>
+    </div>
+  </div>
+
+  <div class="scroll-cue reveal" data-d="820">
+    <span class="scroll-cue__track"><i></i></span>
+    <span class="scroll-cue__label">Scroll — the mosaic moves with you</span>
+  </div>
+</section>
+
+<!-- ══ II · THE ACADEMY ═════════════════════════════════════ -->
+<section class="chapter" id="why" data-scene="1">
+  <div class="shell">
+    <div class="numeral" data-par="0.16">II</div>
+
+    <header class="head">
+      <p class="eyebrow reveal"><span class="eyebrow__rule"></span>Why IBSU</p>
+      <h2 class="reveal" data-d="80">A university built<br><em>for arrival</em></h2>
+      <p class="head__sub reveal" data-d="160">
+        Authorised and accredited in Georgia, IBSU has spent three decades
+        teaching an international student body in English — inside one
+        compact campus in the capital.
+      </p>
+    </header>
+
+    <div class="grid grid--4 stagger">
+      <article class="card glass tilt">
+        <span class="card__num">01</span>
+        <h3>Taught in English</h3>
+        <p>Every programme listed here runs fully in English. No Georgian-language prerequisite to begin your degree.</p>
+      </article>
+      <article class="card glass tilt">
+        <span class="card__num">02</span>
+        <h3>Authorised &amp; accredited</h3>
+        <p>A recognised Georgian higher-education institution, with degrees issued inside the European Higher Education Area framework.</p>
+      </article>
+      <article class="card glass tilt">
+        <span class="card__num">03</span>
+        <h3>Four schools</h3>
+        <p>Business &amp; Management, Computer Technologies &amp; Engineering, Social Sciences, and Education &amp; Humanities.</p>
+      </article>
+      <article class="card glass tilt">
+        <span class="card__num">04</span>
+        <h3>Tbilisi as campus</h3>
+        <p>A capital city where the cost of living stays low, residence permits are workable, and Europe and Asia meet.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ══ III · THE SCROLL ═════════════════════════════════════ -->
+<section class="chapter" id="programmes" data-scene="2">
+  <div class="shell">
+    <div class="numeral" data-par="0.16">III</div>
+
+    <header class="head">
+      <p class="eyebrow reveal"><span class="eyebrow__rule"></span>Programmes</p>
+      <h2 class="reveal" data-d="80">Twenty-six routes,<br><em>one language</em></h2>
+      <p class="head__sub reveal" data-d="160">
+        Degrees are offered across three cycles — bachelor's, master's and
+        doctoral. The schools below group the English-taught catalogue.
+      </p>
+    </header>
+
+    <div class="grid grid--2 stagger">
+      <article class="school glass tilt">
+        <header><span class="school__ord">School I</span><h3>Business &amp; Management</h3></header>
+        <ul>
+          <li>Accounting &amp; Audit</li><li>Finance</li><li>Management</li>
+          <li>Marketing</li><li>Tourism</li>
+        </ul>
+        <footer>BA · MA · PhD</footer>
+      </article>
+
+      <article class="school glass tilt">
+        <header><span class="school__ord">School II</span><h3>Computer Technologies &amp; Engineering</h3></header>
+        <ul>
+          <li>Informatics</li><li>Computer Science</li>
+          <li>Industrial Management &amp; Technologies</li>
+        </ul>
+        <footer>BA · MA · PhD</footer>
+      </article>
+
+      <article class="school glass tilt">
+        <header><span class="school__ord">School III</span><h3>Social Sciences</h3></header>
+        <ul>
+          <li>International Relations</li><li>Economics</li>
+          <li>Public Administration &amp; State Governance</li>
+        </ul>
+        <footer>BA · MA · PhD</footer>
+      </article>
+
+      <article class="school glass tilt">
+        <header><span class="school__ord">School IV</span><h3>Education &amp; Humanities</h3></header>
+        <ul>
+          <li>American Studies</li><li>English Philology</li>
+          <li>Education Sciences</li>
+        </ul>
+        <footer>BA · MA · PhD</footer>
+      </article>
+    </div>
+
+    <p class="note reveal">
+      Programme availability is confirmed each intake — write to
+      <a href="mailto:iro@ibsu.edu.ge">iro@ibsu.edu.ge</a> for the current list.
+    </p>
+  </div>
+</section>
+
+<!-- ══ IV · THE CODEX ═══════════════════════════════════════ -->
+<section class="chapter" id="requirements" data-scene="3">
+  <div class="shell">
+    <div class="numeral" data-par="0.16">IV</div>
+
+    <header class="head">
+      <p class="eyebrow reveal"><span class="eyebrow__rule"></span>Requirements</p>
+      <h2 class="reveal" data-d="80">The documents<br><em>you unroll</em></h2>
+      <p class="head__sub reveal" data-d="160">
+        Each document below must be <b>notarised and translated into Georgian</b>
+        before it is submitted.
+      </p>
+    </header>
+
+    <div class="split">
+      <ol class="vellum glass stagger">
+        <li>
+          <span class="vellum__i">i</span>
+          <div><h3>Copy of passport</h3><p>Valid throughout the intended period of study.</p></div>
+        </li>
+        <li>
+          <span class="vellum__i">ii</span>
+          <div><h3>Graduation certificate or diploma</h3><p>School leaving certificate for bachelor's; bachelor's diploma for master's; master's diploma for doctoral.</p></div>
+        </li>
+        <li>
+          <span class="vellum__i">iii</span>
+          <div><h3>Marksheet / transcript</h3><p>The full academic record accompanying the certificate above.</p></div>
+        </li>
+        <li>
+          <span class="vellum__i">iv</span>
+          <div><h3>Photograph, 3 × 4</h3><p>Standard passport-format photograph.</p></div>
+        </li>
+        <li>
+          <span class="vellum__i">v</span>
+          <div><h3>Enrolment order</h3><p>Only for international degree mobility — issued by the university where you are currently enrolled.</p></div>
+        </li>
+      </ol>
+
+      <aside class="aside-stack stagger">
+        <div class="card glass card--accent tilt">
+          <span class="card__tag">Language</span>
+          <h3>English at B2</h3>
+          <p>A B2-level certificate is accepted. It is <b>not required</b> if your previous degree was taught in English — applicants without a certificate sit an English test organised by IBSU instead.</p>
+        </div>
+        <div class="card glass tilt">
+          <span class="card__tag">Interview</span>
+          <h3>A conversation, not an exam</h3>
+          <p>Every applicant completes a personal interview covering your motivation for studying in Georgia and why you chose your field.</p>
+        </div>
+        <div class="card glass tilt">
+          <span class="card__tag">Tuition</span>
+          <h3>From approx. $2,500 / year</h3>
+          <p>Fees vary by programme and cycle. Scholarships and discounts exist for strong academic records — confirm your exact figure with the IRO before applying.</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ══ V · THE PATH ═════════════════════════════════════════ -->
+<section class="chapter" id="apply" data-scene="4">
+  <div class="shell">
+    <div class="numeral" data-par="0.16">V</div>
+
+    <header class="head">
+      <p class="eyebrow reveal"><span class="eyebrow__rule"></span>How to apply</p>
+      <h2 class="reveal" data-d="80">Five steps along<br><em>the golden road</em></h2>
+    </header>
+
+    <ol class="path stagger">
+      <li class="path__step">
+        <span class="path__dot"><b>1</b></span>
+        <div class="glass path__card tilt">
+          <h3>Choose your programme</h3>
+          <p>Pick the degree and cycle you are applying for, and check the intake is open.</p>
+        </div>
+      </li>
+      <li class="path__step">
+        <span class="path__dot"><b>2</b></span>
+        <div class="glass path__card tilt">
+          <h3>Fill the electronic application form</h3>
+          <p>The IRO issues the online form for international applicants.</p>
+        </div>
+      </li>
+      <li class="path__step">
+        <span class="path__dot"><b>3</b></span>
+        <div class="glass path__card tilt">
+          <h3>Send your documents</h3>
+          <p>Email the completed form with every notarised, Georgian-translated document to <a href="mailto:admissions@ibsu.edu.ge">admissions@ibsu.edu.ge</a>.</p>
+        </div>
+      </li>
+      <li class="path__step">
+        <span class="path__dot"><b>4</b></span>
+        <div class="glass path__card tilt">
+          <h3>Sit your interview</h3>
+          <p>A personal interview about your motivation and your chosen field. English testing happens here if you have no B2 certificate.</p>
+        </div>
+      </li>
+      <li class="path__step">
+        <span class="path__dot"><b>5</b></span>
+        <div class="glass path__card tilt">
+          <h3>Offer, visa and enrolment</h3>
+          <p>On acceptance the IRO issues your invitation documents for the student visa and residence procedure.</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="cta glass reveal">
+      <div>
+        <p class="eyebrow"><span class="eyebrow__rule"></span>International Relations Office</p>
+        <h2>Ask before you<br><em>send anything</em></h2>
+        <p class="cta__sub">The IRO answers programme, document and fee questions directly — it is the fastest way to get an accurate picture of your own case.</p>
+      </div>
+      <ul class="contact">
+        <li><i>Admissions</i><a href="mailto:admissions@ibsu.edu.ge">admissions@ibsu.edu.ge</a></li>
+        <li><i>International Relations Office</i><a href="mailto:iro@ibsu.edu.ge">iro@ibsu.edu.ge</a></li>
+        <li><i>Telephone</i><a href="tel:+995322800064">+995 32 2 800 064 <small>(ext. 165)</small></a></li>
+        <li class="contact__cta"><a class="btn btn--gold" href="mailto:admissions@ibsu.edu.ge"><span>Start your application</span></a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="shell foot__in">
+    <div class="foot__brand">
+      <b>IBSU</b>
+      <span lang="ka">შავი ზღვის საერთაშორისო უნივერსიტეტი</span>
+      <small>2 David Agmashenebeli Alley, 13 km · Tbilisi 0131 · Georgia</small>
+    </div>
+    <nav class="foot__nav" aria-label="Footer">
+      <a href="#why">Why IBSU</a>
+      <a href="#programmes">Programmes</a>
+      <a href="#requirements">Requirements</a>
+      <a href="#apply">Apply</a>
+      <a href="https://ibsu.edu.ge/en/iro/admission/" rel="noopener">Official page ↗</a>
+    </nav>
+    <p class="foot__note">
+      Concept landing page built from the IBSU International Relations Office
+      admission content. Verify tuition, deadlines and document rules with the
+      IRO before submitting an application.
+    </p>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>
