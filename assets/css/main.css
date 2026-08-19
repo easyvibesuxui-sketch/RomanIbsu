@@ -130,7 +130,14 @@ ul,ol{ margin:0; padding:0; list-style:none; }
   padding-block:clamp(6rem,13vh,10.5rem);
   min-height:100svh;
   display:flex; flex-direction:column; justify-content:center;
+  /* Scroll runway. Composition is untouched — the margin simply buys
+     scroll distance after each section so the mosaic advances slowly.
+     Segment durations are cut to match these bands, which is what keeps
+     the pace even from the first screen to the last. */
+  margin-bottom:var(--runway, 100svh);
 }
+/* the footer already supplies trailing scroll for the closing scene */
+#apply{ --runway:34svh; }
 .chapter--hero{ padding-block:clamp(6rem,13vh,8.5rem) clamp(4.5rem,9vh,6rem); }
 
 /* text that sits straight on the video, with no glass beneath it,

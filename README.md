@@ -27,14 +27,39 @@ one page section:
 
 | # | Segment | Master timecode | Section |
 |---|---------|-----------------|---------|
-| I | `scene-1-garden` | 0.0 – 4.6s | Hero — the tree of scrolls |
-| II | `scene-2-academy` | 4.6 – 9.2s | Why IBSU — into the amphitheatre |
-| III | `scene-3-scroll` | 9.2 – 12.6s | Programmes — the scroll opens |
-| IV | `scene-4-codex` | 12.6 – 15.0s | Requirements — the mosaic codex |
-| V | `scene-5-path` | 15.0 – 18.6s | Apply — the golden road |
+| I | `scene-1-garden` | 0.00 – 3.17s | Hero — the tree of scrolls |
+| II | `scene-2-academy` | 3.17 – 6.68s | Why IBSU — arriving at the academy |
+| III | `scene-3-scroll` | 6.68 – 11.29s | Programmes — the lecture hall, and the gold veil |
+| IV | `scene-4-codex` | 11.29 – 15.51s | Requirements — the scroll unrolls |
+| V | `scene-5-path` | 15.51 – 18.58s | Apply — the golden road |
 
 Because all five are slices of one master edit, consecutive segments line up
 frame-to-frame and the hand-off between sections is invisible.
+
+### Why these boundaries
+
+The cut points are not chosen by the narrative alone — they are chosen so the
+mosaic advances at the **same speed everywhere on the page**.
+
+Each scene is scrubbed across its own scroll band (its chapter's top to the
+next chapter's top), so a scene's pace is `band height ÷ duration`. The first
+cut ignored this and the result lurched: the hero burned a second of video
+every 196px of scroll while Requirements took 541px for the same second — the
+opening of the page ran 2.7× faster than the middle.
+
+The fix is two-part, and both halves are needed:
+
+1. **Scroll runway.** Each `.chapter` carries a `margin-bottom` of one
+   viewport (`--runway`), which buys scroll distance without touching the
+   composition — the mosaic simply gets a screen to breathe between sections.
+2. **Durations cut to match the bands.** Section heights were measured in the
+   browser at several viewports, and each segment was cut to its section's
+   measured share of total scroll.
+
+The result is ~520px of scroll per second of video across all five scenes on
+desktop (~620 on mobile), against 196–541 before. If you change a section's
+content height significantly, re-measure and re-cut, or that section will
+drift out of step with the rest.
 
 ### No autoplay — this is a hard contract
 
@@ -44,7 +69,7 @@ written to `video.currentTime`. Stop scrolling and the mosaic stops with you.
 
 The scrub loop eases toward the scroll target rather than snapping to it, skips
 a write while a seek is still in flight, and only touches the active scene and
-its two neighbours. Segments load lazily — the hero is ~1.2 MB, the rest arrive
+its two neighbours. Segments load lazily — the hero is ~850 KB, the rest arrive
 as you approach them.
 
 ### The transition between the two source videos
@@ -53,7 +78,8 @@ The raw cut from video 1 to video 2 was abrupt. The two are now joined with a
 1.4s cross-dissolve overlaid by a **gold veil at 46% opacity** (`#EBCB86`),
 faded in over 0.6s and out over 0.85s so the whole frame blooms warm through
 the hand-off and settles into the next scene. It reads as a designed moment
-rather than a cut. The veil sits at the section II → III boundary.
+rather than a cut. After the re-cut it sits inside scene III rather than on
+a section boundary, so it plays through uninterrupted by the cross-fade.
 
 Rebuild command (needs `ffmpeg`), from the two source mp4s:
 
@@ -69,11 +95,12 @@ ffmpeg -i 1.mp4 -i 2.mp4 -f lavfi -i "color=c=0xEBCB86:s=1280x720:d=20:r=24" \
   -map "[out]" -an -t 18.6 -c:v libx264 -crf 17 -preset slow master.mp4
 ```
 
-Each segment is then cut from `master.mp4` at 15 fps, 1152×648, with a
+Each segment is then cut from `master.mp4` (at the boundaries in the table
+above) at 15 fps, 1152×648, with a
 keyframe every 5 frames (`-g 5 -keyint_min 5 -sc_threshold 0`) so seeking stays
 cheap, plus `gblur=sigma=0.9`. The blur is deliberate: it costs nothing visually
 behind the scrim and glass, and roughly halves the bitrate on this
-high-entropy mosaic texture. Total video payload is ~4 MB (mp4) / ~3.4 MB (webm).
+high-entropy mosaic texture. Total video payload is ~3.9 MB (mp4) / ~4.3 MB (webm).
 
 ## Serving requirement
 
