@@ -1,0 +1,42 @@
+# Static site — no build step, the repo root is the deploy directory.
+# Deployed by connecting this repo to Netlify (Import from Git); there is
+# nothing to compile, so no build command is set.
+[build]
+  publish = "."
+
+# Fonts never change under these filenames, so they can be cached hard.
+[[headers]]
+  for = "/assets/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Access-Control-Allow-Origin = "*"
+
+# Scene segments and posters are large and change rarely, but the filenames
+# are not content-hashed — a week keeps repeat visits instant without
+# stranding a redeploy behind a year-long cache.
+[[headers]]
+  for = "/assets/video/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/assets/poster/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/assets/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+[[headers]]
+  for = "/assets/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
