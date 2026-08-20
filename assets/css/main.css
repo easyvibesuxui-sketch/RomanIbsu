@@ -46,6 +46,11 @@
                   0 2px 10px -4px rgba(0,0,0,.5);
 }
 
+/* A fixed 1180px column reads as a thin ribbon on a large display, so the
+   content column grows once the screen genuinely has room for it. */
+@media (min-width:1700px){ :root{ --shell:1300px; } }
+@media (min-width:2200px){ :root{ --shell:1420px; } }
+
 /* ── reset ──────────────────────────────────────────────── */
 *,*::before,*::after{ box-sizing:border-box; }
 html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
@@ -222,7 +227,8 @@ ul,ol{ margin:0; padding:0; list-style:none; }
 .nav{
   position:fixed; top:0; left:0; right:0; z-index:20;
   display:flex; align-items:center; gap:2rem;
-  padding:1.35rem var(--gut);
+  padding-block:1.35rem;
+  padding-inline:max(var(--gut), calc((100% - var(--shell)) / 2));
   transition:padding .5s var(--ease), background .5s var(--ease), backdrop-filter .5s;
   border-bottom:1px solid transparent;
 }
@@ -391,7 +397,8 @@ ul,ol{ margin:0; padding:0; list-style:none; }
 
 /* scroll invitation — the page is inert until you scroll, so say so */
 .scroll-cue{
-  position:absolute; left:var(--gut); bottom:clamp(1.6rem,4vh,2.8rem);
+  position:absolute; bottom:clamp(1.6rem,4vh,2.8rem);
+  left:max(var(--gut), calc((100% - var(--shell)) / 2));
   display:flex; align-items:center; gap:.9rem; z-index:4;
 }
 .scroll-cue__track{
