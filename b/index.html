@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ვეფხისტყაოსანი</title>
+<meta name="description" content="შოთა რუსთაველის „ვეფხისტყაოსნის“ ლეგენდა — რვა აქტი, რომელიც სქროლით იშლება.">
+<meta name="theme-color" content="#e9e1d3">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='6' fill='%23f1e6cf'/%3E%3Cpath d='M9 27c5-9 12-13 22-14-4 3-6 6-7 10-4-3-9-1-15 4z' fill='%23a3732b'/%3E%3Ccircle cx='27' cy='14' r='2' fill='%233b2a17'/%3E%3C/svg%3E">
+
+<link rel="preload" href="../assets/fonts/noto-serif-georgian-georgian.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" as="image" href="assets/img/00-prologue.webp" media="(min-width: 700px)">
+<link rel="preload" as="image" href="assets/img/00-prologue-m.webp" media="(max-width: 699px)">
+<link rel="stylesheet" href="../assets/css/fonts.css">
+<link rel="stylesheet" href="assets/css/b.css">
+</head>
+<body>
+
+<!-- The page scrolls a tall, empty track; everything visible lives in the
+     fixed stage below and is driven by that scroll position. Nothing here
+     plays on its own. -->
+<div class="track" id="track" aria-hidden="true"></div>
+
+<div class="stage">
+  <figure class="card" id="card">
+    <canvas class="scene-canvas" id="gl" aria-hidden="true"></canvas>
+    <div class="scrim" aria-hidden="true"></div>
+
+    <header class="chrome">
+      <a class="brand" href="#" data-jump="0" aria-label="ვეფხისტყაოსანი — დასაწყისი">ვეფხისტყაოსანი</a>
+      <nav class="acts" aria-label="აქტები">
+        <button type="button" data-jump="0" aria-label="I — პროლოგი">I</button>
+        <button type="button" data-jump="1" aria-label="II — თინათინის მეფობა">II</button>
+        <button type="button" data-jump="2" aria-label="III — უცხო მოყმე">III</button>
+        <button type="button" data-jump="3" aria-label="IV — ავთანდილის ძებნა">IV</button>
+        <button type="button" data-jump="5" aria-label="V — ნესტან-დარეჯანი">V</button>
+        <button type="button" data-jump="6" aria-label="VI — ძმადნაფიცნი">VI</button>
+        <button type="button" data-jump="7" aria-label="VII — ქაჯეთის ციხე">VII</button>
+        <button type="button" data-jump="8" aria-label="VIII — ეპილოგი">VIII</button>
+      </nav>
+    </header>
+
+    <!-- ── the acts ─────────────────────────────────────────────
+         Each article belongs to one scene. Its parts carry data-o, the
+         order they arrive in once the scene has settled — label first,
+         then the lines, then the gloss. Quotations from the poem are set
+         in „ “ ; lines without them are narration, not Rustaveli. -->
+    <div class="acts-text">
+
+      <article class="act act--prologue" data-scene="0">
+        <p class="label" data-o="0">შოთა რუსთაველი</p>
+        <h1 class="title" data-o="1">ვეფხისტყაოსანი</h1>
+        <p class="verse" data-o="2">„რომელმან შექმნა სამყარო<br>ძალითა მით ძლიერითა“</p>
+        <p class="cue" data-o="3"><span aria-hidden="true"></span>ჩამოსქროლე — ამბავი იშლება</p>
+      </article>
+
+      <article class="act" data-scene="1">
+        <p class="label" data-o="0"><b>II</b>თინათინის მეფობა</p>
+        <p class="verse" data-o="1">„ლეკვი ლომისა სწორია,<br>ძუ იყოს, თუნდა ხვადია.“</p>
+        <p class="gloss" data-o="2">არაბეთის მეფე როსტევანი ტახტს თავის ასულს უთმობს.</p>
+      </article>
+
+      <article class="act" data-scene="2">
+        <p class="label" data-o="0"><b>III</b>უცხო მოყმე</p>
+        <p class="verse" data-o="1">მდინარის პირას იჯდა მოყმე,<br>ვეფხის ტყავით მოსილი.</p>
+        <p class="gloss" data-o="2">მეფემ იგი ნადირობისას იხილა — და ვერავინ შეიპყრო.</p>
+      </article>
+
+      <article class="act" data-scene="3">
+        <p class="label" data-o="0"><b>IV</b>ავთანდილის ძებნა</p>
+        <p class="verse" data-o="1">„ჭირსა შიგან გამაგრება,<br>ასრე უნდა, ვით ქვითკირსა.“</p>
+        <p class="gloss" data-o="2">თინათინმა ავთანდილი გაგზავნა — სამი წლით, უცნობის საძიებლად.</p>
+      </article>
+
+      <article class="act act--breath" data-scene="4">
+        <p class="verse" data-o="0">სამი წელი.<br>ერთი გზა.</p>
+      </article>
+
+      <article class="act" data-scene="5">
+        <p class="label" data-o="0"><b>V</b>ნესტან-დარეჯანი</p>
+        <p class="verse" data-o="1">ქაჯეთის ციხეში დატყვევებული<br>წერილს უგზავნის ტარიელს.</p>
+        <p class="gloss" data-o="2">ტარიელის სატრფო, ინდოეთის მეფის ასული.</p>
+      </article>
+
+      <article class="act" data-scene="6">
+        <p class="label" data-o="0"><b>VI</b>ძმადნაფიცნი</p>
+        <p class="verse" data-o="1">ავთანდილი, ტარიელი, ფრიდონი —<br>სამი ხმალი, ერთი ფიცი.</p>
+        <p class="gloss" data-o="2">მეგობრობა და ერთგულება — პოემის ხერხემალი.</p>
+      </article>
+
+      <article class="act" data-scene="7">
+        <p class="label" data-o="0"><b>VII</b>ქაჯეთის ციხე</p>
+        <p class="verse" data-o="1">„სჯობს სიცოცხლესა ნაძრახსა<br>სიკვდილი სახელოვანი.“</p>
+        <p class="gloss" data-o="2">სამმა რაინდმა ქაჯეთი აიღო და ნესტანი იხსნა.</p>
+      </article>
+
+      <article class="act" data-scene="8">
+        <p class="label" data-o="0"><b>VIII</b>ეპილოგი</p>
+        <p class="verse" data-o="1">„ბოროტსა სძლია კეთილმან,<br>არსება მისი გრძელია.“</p>
+        <p class="gloss" data-o="2">ორი ქორწილი — ტარიელისა და ნესტანის, ავთანდილისა და თინათინის.</p>
+      </article>
+
+      <article class="act" data-scene="9">
+        <p class="label" data-o="0">ბოლოთქმა</p>
+        <p class="verse" data-o="1">„ესე ამბავი სპარსული,<br>ქართულად ნათარგმანები“</p>
+        <p class="gloss" data-o="2">შოთა რუსთაველი · XII საუკუნე</p>
+      </article>
+
+      <article class="act act--end on-paper" data-scene="10">
+        <p class="label" data-o="0">დასასრული</p>
+        <p class="end-title" data-o="1">ვეფხისტყაოსანი</p>
+        <p class="gloss" data-o="2">რვა აქტი · შოთა რუსთაველის ლეგენდა</p>
+        <p class="end-links" data-o="3">
+          <button type="button" class="pill" data-jump="0">თავიდან</button>
+          <a class="pill pill--ghost" href="../">A ვერსია</a>
+        </p>
+      </article>
+    </div>
+
+    <footer class="meter" aria-hidden="true">
+      <span class="meter__bar"><i id="meterFill"></i></span>
+      <span class="meter__count"><b id="actNow">I</b><span>/</span>VIII</span>
+    </footer>
+  </figure>
+</div>
+
+<noscript>
+  <p class="noscript">ეს გვერდი სქროლით მართულ ანიმაციას იყენებს და JavaScript სჭირდება.</p>
+</noscript>
+
+<script src="assets/js/b.js"></script>
+</body>
+</html>

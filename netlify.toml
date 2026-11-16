@@ -34,6 +34,22 @@
   [headers.values]
     Cache-Control = "public, max-age=3600, must-revalidate"
 
+# B version (/b/) — the paintings are large and stable; code changes more often.
+[[headers]]
+  for = "/b/assets/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/b/assets/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+[[headers]]
+  for = "/b/assets/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
 [[headers]]
   for = "/*"
   [headers.values]

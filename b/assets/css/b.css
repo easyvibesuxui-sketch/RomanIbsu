@@ -1,0 +1,290 @@
+/* ═══════════════════════════════════════════════════════════
+   ვეფხისტყაოსანი — B version
+   A framed painting on a pale ground that takes its colour from
+   whichever scene is on the canvas. Type is small and late: the
+   scene settles first, the words arrive after.
+   ═══════════════════════════════════════════════════════════ */
+
+:root{
+  /* ambient ground — rewritten every frame from the current scene */
+  --amb-top: #cdd6dc;
+  --amb-bot: #e3d6c4;
+
+  --ivory:   #f7f0e3;
+  --ivory-2: rgba(247,240,227,.78);
+  --ivory-3: rgba(247,240,227,.56);
+  --ink:     #3a2a17;
+  --ink-2:   rgba(58,42,23,.72);
+  --gold:    #d2a453;
+  --gold-hi: #f0d79c;
+
+  --ka:  "Noto Serif Georgian", "Sylfaen", "DejaVu Serif", serif;
+  --num: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+
+  --ease: cubic-bezier(.22,.61,.36,1);
+  --pad: clamp(18px, 3.6%, 46px);
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; }
+body{
+  margin:0;
+  min-height:100%;
+  background:
+    radial-gradient(120% 70% at 50% 0%, var(--amb-top) 0%, transparent 70%),
+    linear-gradient(180deg, var(--amb-top) 0%, var(--amb-bot) 100%);
+  background-color:var(--amb-bot);
+  color:var(--ivory);
+  font-family:var(--ka);
+  font-weight:300;
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;
+}
+button{ font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer; }
+:focus-visible{ outline:1.5px solid var(--gold-hi); outline-offset:3px; border-radius:2px; }
+
+/* the scroll track: tall, empty, sized in script */
+.track{ width:1px; height:2400vh; }
+
+/* ── stage & card ───────────────────────────────────────── */
+.stage{
+  position:fixed; inset:0;
+  display:grid; place-items:center;
+  padding:clamp(14px, 3.4vw, 56px);
+  pointer-events:none;
+}
+.card{
+  position:relative; margin:0;
+  width:min(100%, calc((100svh - 2 * clamp(14px, 3.4vw, 56px)) * 16 / 9));
+  aspect-ratio:16 / 9;
+  border-radius:7px;
+  overflow:hidden;
+  background:#e8dcc4;
+  box-shadow:
+    0 50px 110px -40px rgba(24,28,44,.55),
+    0 18px 40px -18px rgba(24,28,44,.35),
+    0 0 0 1px rgba(255,255,255,.18) inset;
+  pointer-events:auto;
+  isolation:isolate;
+}
+.scene-canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+
+/* a quiet shade under the words, never across the whole painting */
+.scrim{
+  position:absolute; inset:0; pointer-events:none; z-index:1;
+  background:
+    radial-gradient(70% 60% at 0% 100%, rgba(10,14,26,.52) 0%, rgba(10,14,26,.18) 45%, transparent 72%),
+    linear-gradient(180deg, rgba(10,14,26,.32) 0%, transparent 16%);
+  transition:opacity .6s var(--ease);
+}
+.card.is-paper .scrim{ opacity:0; }
+.card.is-prologue .scrim{
+  background:
+    linear-gradient(90deg, rgba(10,14,26,.50) 0%, rgba(10,14,26,.16) 42%, transparent 62%),
+    linear-gradient(180deg, rgba(10,14,26,.32) 0%, transparent 16%);
+}
+
+/* ── chrome: brand + act numerals ───────────────────────── */
+.chrome{
+  position:absolute; z-index:3; left:0; right:0; top:0;
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  padding:calc(var(--pad) * .7) var(--pad);
+  color:var(--ivory);
+  transition:color .6s var(--ease);
+}
+.brand{
+  font-size:clamp(10.5px, .86vw, 13px);
+  letter-spacing:.14em;
+  color:inherit;
+  text-decoration:none;
+  opacity:.92;
+}
+.acts{ display:flex; gap:clamp(.55rem, 1.3vw, 1.35rem); }
+.acts button{
+  position:relative;
+  font-family:var(--num); font-size:clamp(11px, .95vw, 14px); font-weight:500;
+  letter-spacing:.08em;
+  opacity:.55;
+  padding:.35rem .1rem;
+  transition:opacity .4s var(--ease), color .4s var(--ease);
+}
+.acts button::after{
+  content:""; position:absolute; left:50%; bottom:0; width:0; height:1px;
+  background:currentColor; transform:translateX(-50%);
+  transition:width .45s var(--ease);
+}
+.acts button:hover{ opacity:.95; }
+.acts button[aria-current="true"]{ opacity:1; color:var(--gold-hi); }
+.acts button[aria-current="true"]::after{ width:100%; }
+
+.card.is-paper .chrome,
+.card.is-paper .meter{ color:var(--ink); }
+.card.is-paper .acts button[aria-current="true"]{ color:#9a6a24; }
+
+/* ── the acts ───────────────────────────────────────────── */
+.acts-text{ position:absolute; inset:0; z-index:2; pointer-events:none; }
+.act{
+  position:absolute;
+  left:var(--pad); bottom:calc(var(--pad) * 1.55);
+  width:min(46%, 34rem);
+  visibility:hidden;
+}
+.act.is-live{ visibility:visible; }
+.act.is-live .end-links{ pointer-events:auto; }
+.act > *{
+  margin:0;
+  opacity:0;
+  will-change:opacity, transform;
+  text-shadow:0 1px 18px rgba(8,12,24,.55), 0 1px 2px rgba(8,12,24,.35);
+}
+
+.label{
+  display:flex; align-items:baseline; gap:.7em;
+  font-size:clamp(10px, .8vw, 12.5px);
+  letter-spacing:.12em;
+  color:var(--ivory-2);
+  margin-bottom:clamp(.6rem, 1.1vw, 1rem) !important;
+}
+.label b{
+  font-family:var(--num); font-weight:500; font-size:1.35em; letter-spacing:.06em;
+  color:var(--gold-hi);
+}
+.verse{
+  font-size:clamp(14px, 1.36vw, 22px);
+  line-height:1.6;
+  font-weight:300;
+  color:var(--ivory);
+}
+.gloss{
+  margin-top:clamp(.55rem, 1vw, .95rem) !important;
+  max-width:30em;
+  font-size:clamp(10.5px, .86vw, 13.5px);
+  line-height:1.65;
+  color:var(--ivory-3);
+}
+
+/* prologue: the one moment that is allowed a title */
+.act--prologue{
+  bottom:auto; top:50%;
+  transform:translateY(-46%);
+  width:min(44%, 32rem);
+}
+.title{
+  font-size:clamp(26px, 3.7vw, 60px);
+  line-height:1.05;
+  font-weight:300;
+  letter-spacing:.005em;
+  margin:.15em 0 .5em !important;
+}
+.cue{
+  display:flex; align-items:center; gap:.9em;
+  margin-top:clamp(1.2rem, 2.4vw, 2.2rem) !important;
+  font-size:clamp(9.5px, .74vw, 11.5px);
+  letter-spacing:.14em;
+  color:var(--ivory-3);
+}
+.cue span{
+  position:relative; width:1px; height:34px; overflow:hidden;
+  background:rgba(247,240,227,.25);
+}
+.cue span::after{
+  content:""; position:absolute; left:0; top:-14px; width:1px; height:14px;
+  background:var(--gold-hi);
+  animation:cue 2.4s var(--ease) infinite;
+}
+@keyframes cue{ 0%{ top:-14px } 60%,100%{ top:36px } }
+
+/* the breath: one line, alone on an empty sky */
+.act--breath{ bottom:auto; top:44%; }
+.act--breath .verse{ font-size:clamp(15px, 1.5vw, 24px); letter-spacing:.01em; }
+
+/* end card on parchment */
+.act--end{
+  left:50%; bottom:auto; top:50%;
+  transform:translate(-50%, -50%);
+  width:min(80%, 34rem);
+  text-align:center;
+}
+.act--end > *{ text-shadow:none; }
+.act--end .label{ justify-content:center; color:var(--ink-2); }
+.end-title{
+  font-size:clamp(26px, 3.4vw, 54px);
+  font-weight:300;
+  color:var(--ink);
+  margin:.2em 0 .35em !important;
+}
+.act--end .gloss{ color:var(--ink-2); margin-inline:auto !important; }
+.end-links{
+  display:flex; justify-content:center; flex-wrap:wrap; gap:.7rem;
+  margin-top:clamp(1.2rem, 2.2vw, 2rem) !important;
+}
+.pill{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-height:40px; padding:.6rem 1.35rem;
+  border-radius:999px;
+  font-size:clamp(11px, .85vw, 13px); letter-spacing:.08em;
+  text-decoration:none;
+  color:#fbf4e6; background:#4a3519;
+  box-shadow:0 10px 22px -12px rgba(58,42,23,.6);
+  transition:transform .4s var(--ease), background .4s var(--ease);
+}
+.pill:hover{ transform:translateY(-2px); background:#5c4220; }
+.pill--ghost{ color:var(--ink); background:transparent; box-shadow:inset 0 0 0 1px rgba(58,42,23,.38); }
+.pill--ghost:hover{ background:rgba(58,42,23,.07); }
+
+/* ── meter ──────────────────────────────────────────────── */
+.meter{
+  position:absolute; z-index:3; left:var(--pad); right:var(--pad); bottom:calc(var(--pad) * .6);
+  display:flex; align-items:center; gap:1rem;
+  color:var(--ivory);
+  pointer-events:none;
+}
+.meter__bar{ position:relative; flex:1; height:1px; background:currentColor; opacity:.22; }
+.meter__bar i{
+  position:absolute; left:0; top:0; bottom:0; width:0;
+  background:var(--gold-hi); opacity:1;
+}
+.card.is-paper .meter__bar i{ background:#9a6a24; }
+.meter__count{
+  font-family:var(--num); font-size:clamp(10.5px, .85vw, 13px); letter-spacing:.12em;
+  display:flex; gap:.4em; opacity:.8;
+}
+.meter__count b{ font-weight:500; }
+
+/* ── portrait: the painting becomes a tall window ───────── */
+@media (max-aspect-ratio: 1/1){
+  .stage{ padding:10px; }
+  .card{
+    width:100%;
+    height:calc(100svh - 20px);
+    aspect-ratio:auto;
+  }
+  .acts{ display:none; }
+  .act, .act--prologue{ width:auto; right:var(--pad); }
+  .act{ bottom:calc(var(--pad) * 2.6); }
+  .act--prologue{ top:auto; bottom:calc(var(--pad) * 2.6); transform:none; }
+  .act--breath{ top:auto; }
+  .act--end{ left:var(--pad); right:var(--pad); width:auto; transform:translateY(-50%); }
+  .scrim, .card.is-prologue .scrim{
+    background:
+      linear-gradient(0deg, rgba(10,14,26,.62) 0%, rgba(10,14,26,.28) 38%, transparent 62%),
+      linear-gradient(180deg, rgba(10,14,26,.34) 0%, transparent 14%);
+  }
+  .verse{ font-size:17px; }
+  .title{ font-size:clamp(30px, 9vw, 44px); }
+  .gloss{ font-size:12.5px; }
+  .label{ font-size:10.5px; }
+  .brand{ font-size:10.5px; }
+}
+
+/* ── reduced motion: still scroll-driven, never animated ── */
+@media (prefers-reduced-motion: reduce){
+  .cue span::after{ animation:none; top:10px; }
+  .pill, .acts button, .scrim{ transition:none; }
+}
+
+.noscript{
+  position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
+  padding:.8rem 1.2rem; border-radius:6px;
+  background:#fbf4e6; color:var(--ink); font-size:14px;
+}
