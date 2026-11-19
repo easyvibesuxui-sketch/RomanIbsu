@@ -43,20 +43,24 @@ body{
 button{ font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer; }
 :focus-visible{ outline:1.5px solid var(--gold-hi); outline-offset:3px; border-radius:2px; }
 
-/* the scroll track: tall, empty, sized in script */
-.track{ width:1px; height:2400vh; }
-
 /* ── stage & card ───────────────────────────────────────── */
-.stage{
-  position:fixed; inset:0;
+/* The stage and every act's pin share one geometry, so the words
+   pinned in a section sit exactly on the painting behind them. */
+.stage, .pin{
+  height:100svh;
   display:grid; place-items:center;
   padding:clamp(14px, 3.4vw, 56px);
+}
+.stage{
+  position:fixed; top:0; left:0; right:0; z-index:0;
   pointer-events:none;
 }
-.card{
+.card, .frame{
   position:relative; margin:0;
   width:min(100%, calc((100svh - 2 * clamp(14px, 3.4vw, 56px)) * 16 / 9));
   aspect-ratio:16 / 9;
+}
+.card{
   border-radius:7px;
   overflow:hidden;
   background:#e8dcc4;
@@ -121,8 +125,11 @@ button{ font:inherit; color:inherit; background:none; border:0; padding:0; curso
 .card.is-paper .meter{ color:var(--ink); }
 .card.is-paper .acts button[aria-current="true"]{ color:#9a6a24; }
 
-/* ── the acts ───────────────────────────────────────────── */
-.acts-text{ position:absolute; inset:0; z-index:2; pointer-events:none; }
+/* ── the acts: tall sections, each with a sticky pin ────── */
+.story{ position:relative; z-index:1; pointer-events:none; }
+.sec{ position:relative; }            /* height set in script */
+.pin{ position:sticky; top:0; }
+.frame{ overflow:hidden; border-radius:7px; }
 .act{
   position:absolute;
   left:var(--pad); bottom:calc(var(--pad) * 1.55);
@@ -163,6 +170,44 @@ button{ font:inherit; color:inherit; background:none; border:0; padding:0; curso
   color:var(--ivory-3);
 }
 
+/* ── entrances ──────────────────────────────────────────────
+   Script writes each part's progress; these only shape it. */
+
+/* the act's numeral: large, thin, settling out of a blur */
+.numeral{
+  display:block;
+  font-family:var(--num); font-weight:300;
+  font-size:clamp(46px, 6.2vw, 108px);
+  line-height:.82;
+  letter-spacing:.02em;
+  color:var(--gold-hi);
+  margin:0 0 clamp(.5rem, 1.1vw, 1rem) -.04em !important;
+  text-shadow:0 2px 30px rgba(8,12,24,.45);
+}
+
+/* a gold rule that draws itself from the left, ending in a lozenge */
+.rule{
+  display:block; position:relative;
+  width:clamp(44px, 5.2vw, 84px); height:1px;
+  margin:0 0 clamp(.7rem, 1.25vw, 1.15rem) !important;
+  background:linear-gradient(90deg, var(--gold-hi), rgba(240,215,156,.15));
+  transform-origin:0 50%;
+  text-shadow:none !important;
+}
+.rule::after{
+  content:""; position:absolute; right:-3px; top:-3px; width:6px; height:6px;
+  background:var(--gold-hi); transform:rotate(45deg);
+}
+.rule--center{ margin-inline:auto !important; transform-origin:50% 50%; background:linear-gradient(90deg, transparent, #9a6a24, transparent); }
+.rule--center::after{ background:#9a6a24; right:calc(50% - 3px); }
+
+/* verse lines rise out of their own line box */
+.ln{ display:block; overflow:hidden; padding-bottom:.08em; margin-bottom:-.08em; }
+.ln > i{ display:block; font-style:normal; will-change:transform; }
+
+/* letters: each glyph arrives on its own */
+.ch{ display:inline-block; white-space:pre; will-change:transform, opacity; }
+
 /* prologue: the one moment that is allowed a title */
 .act--prologue{
   bottom:auto; top:50%;
@@ -195,7 +240,8 @@ button{ font:inherit; color:inherit; background:none; border:0; padding:0; curso
 @keyframes cue{ 0%{ top:-14px } 60%,100%{ top:36px } }
 
 /* the breath: one line, alone on an empty sky */
-.act--breath{ bottom:auto; top:44%; }
+.act--breath{ bottom:auto; top:40%; }
+.act--breath .verse + .verse{ margin-top:.2em !important; padding-left:2.2em; }
 .act--breath .verse{ font-size:clamp(15px, 1.5vw, 24px); letter-spacing:.01em; }
 
 /* end card on parchment */
@@ -253,8 +299,8 @@ button{ font:inherit; color:inherit; background:none; border:0; padding:0; curso
 
 /* ── portrait: the painting becomes a tall window ───────── */
 @media (max-aspect-ratio: 1/1){
-  .stage{ padding:10px; }
-  .card{
+  .stage, .pin{ padding:10px; }
+  .card, .frame{
     width:100%;
     height:calc(100svh - 20px);
     aspect-ratio:auto;
@@ -274,6 +320,7 @@ button{ font:inherit; color:inherit; background:none; border:0; padding:0; curso
   .title{ font-size:clamp(30px, 9vw, 44px); }
   .gloss{ font-size:12.5px; }
   .label{ font-size:10.5px; }
+  .numeral{ font-size:44px; }
   .brand{ font-size:10.5px; }
 }
 
@@ -288,3 +335,8 @@ button{ font:inherit; color:inherit; background:none; border:0; padding:0; curso
   padding:.8rem 1.2rem; border-radius:6px;
   background:#fbf4e6; color:var(--ink); font-size:14px;
 }
+
+/* offscreen holders */
+.vids{ position:absolute; left:0; top:0; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
+.vids video{ width:1px; height:1px; }
+.sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }

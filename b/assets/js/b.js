@@ -1,9 +1,11 @@
 /* ═══════════════════════════════════════════════════════════
    ვეფხისტყაოსანი — B version · scroll-owned scene compositor
    ───────────────────────────────────────────────────────────
-   The page is a tall empty track. Scroll position is read as a
-   point on a timeline of dwells (a scene held still, slowly
-   pushing in) and transitions (one scene becoming the next).
+   The page is a run of tall sections, one per act, each with a
+   sticky pin. Scroll position is read as a point on a timeline of
+   dwells (an act pinned while its video runs) and transitions (one
+   scene becoming the next). Each scene is a short painted film; scroll
+   writes its currentTime — this file never calls video.play().
    One WebGL shader draws every transition; each has its own mode,
    taken from the reference:
 
@@ -21,7 +23,9 @@
      9 to-paper    zoom into the scroll until only parchment is left
     10 fade        plain cross-fade (reduced motion, no WebGL)
 
-   Nothing advances unless the reader scrolls.
+   Over every scene, scroll-driven gold motes and, as each act
+   settles, one slow sweep of light. Nothing advances unless the
+   reader scrolls.
    ═══════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -32,17 +36,17 @@
   // focus: where the subject sits (image uv, top-left origin) — used
   // when a tall screen has to crop the painting.
   var SCENES = [
-    { img: '00-prologue', focus: [0.50, 0.45], amb: [[108,141,160], [141,124, 99]] },
-    { img: '01-tinatin',  focus: [0.74, 0.40], amb: [[141,127, 99], [110, 91, 59]] },
-    { img: '02-stranger', focus: [0.62, 0.55], amb: [[111,114,112], [114, 95, 65]] },
-    { img: '03-quest',    focus: [0.78, 0.55], amb: [[146,147,145], [174,147,107]] },
-    { img: '04-sky',      focus: [0.50, 0.50], amb: [[160,167,164], [160,160,157]], breath: true },
-    { img: '05-nestan',   focus: [0.62, 0.45], amb: [[110,111,111], [ 76, 81, 77]] },
-    { img: '06-brothers', focus: [0.74, 0.45], amb: [[123,136,153], [131,120,105]] },
-    { img: '07-kajeti',   focus: [0.64, 0.55], amb: [[107,109,112], [ 86, 84, 69]] },
-    { img: '08-feast',    focus: [0.78, 0.55], amb: [[158,148,121], [118, 97, 58]] },
-    { img: '09-colophon', focus: [0.45, 0.45], amb: [[136,156,170], [140,129,116]] },
-    { img: null,          focus: [0.50, 0.50], amb: [[226,210,178], [212,193,160]], paper: true }
+    { img: '00-prologue', dust: .35, focus: [0.50, 0.45], amb: [[108,141,160], [141,124, 99]] },
+    { img: '01-tinatin',  dust: .45, focus: [0.74, 0.40], amb: [[141,127, 99], [110, 91, 59]] },
+    { img: '02-stranger', dust: .60, focus: [0.62, 0.55], amb: [[111,114,112], [114, 95, 65]] },
+    { img: '03-quest',    dust: .85, focus: [0.78, 0.55], amb: [[146,147,145], [174,147,107]] },
+    { img: '04-sky',      dust: .20, focus: [0.50, 0.50], amb: [[160,167,164], [160,160,157]], breath: true },
+    { img: '05-nestan',   dust: .50, focus: [0.62, 0.45], amb: [[110,111,111], [ 76, 81, 77]] },
+    { img: '06-brothers', dust: .40, focus: [0.74, 0.45], amb: [[123,136,153], [131,120,105]] },
+    { img: '07-kajeti',   dust: .75, focus: [0.64, 0.55], amb: [[107,109,112], [ 86, 84, 69]] },
+    { img: '08-feast',    dust: .95, focus: [0.78, 0.55], amb: [[158,148,121], [118, 97, 58]] },
+    { img: '09-colophon', dust: .40, focus: [0.45, 0.45], amb: [[136,156,170], [140,129,116]] },
+    { img: null,          dust: 0,   focus: [0.50, 0.50], amb: [[226,210,178], [212,193,160]], paper: true }
   ];
 
   // transition i joins scene i to scene i+1. pt / zoomPt are image uv
@@ -60,12 +64,13 @@
     { mode: 9, len: 1.30, zoomPt: [0.55, 0.52] }
   ];
 
-  // dwell lengths, in viewport heights of scroll
+  // dwell lengths, in viewport heights of scroll. Each act holds long
+  // enough for its film to play out under the reader's hand.
   function dwellLen(i) {
-    if (i === 0) return 1.15;
-    if (SCENES[i].breath) return 0.95;
+    if (i === 0) return 2.0;
+    if (SCENES[i].breath) return 1.6;
     if (SCENES[i].paper) return 1.0;
-    return 1.3;
+    return 2.4;
   }
 
   /* ── timeline ──────────────────────────────────────────── */
@@ -94,25 +99,40 @@
   /* ── dom ───────────────────────────────────────────────── */
   var card = document.getElementById('card');
   var canvas = document.getElementById('gl');
-  var track = document.getElementById('track');
+  var secs = [].slice.call(document.querySelectorAll('.sec'));
   var meterFill = document.getElementById('meterFill');
   var actNow = document.getElementById('actNow');
   var navBtns = [].slice.call(document.querySelectorAll('.acts button'));
-  var acts = [].slice.call(document.querySelectorAll('.act')).map(function (el) {
-    return { el: el, scene: +el.dataset.scene, parts: [].slice.call(el.querySelectorAll('[data-o]')) };
+  var acts = secs.map(function (sec) {
+    var el = sec.querySelector('.act');
+    return { el: el, scene: +sec.dataset.scene, parts: [].slice.call(el.querySelectorAll('[data-o]')).map(prepPart) };
   });
   var ROMAN = ['I', 'II', 'III', 'IV', 'IV', 'V', 'VI', 'VII', 'VIII', 'VIII', 'VIII'];
   var NAV_OF = [0, 1, 2, 3, 3, 4, 5, 6, 7, 7, 7];  // scene → nav button index
 
-  /* ── scroll unit ───────────────────────────────────────── */
+  /* ── scroll unit & sections ────────────────────────────── */
   // One unit = one viewport height, held steady through mobile URL-bar
-  // resizes so the page doesn't jump as the bar slides away.
+  // resizes so the page doesn't jump as the bar slides away. Section i
+  // owns act i's dwell and the transition that carries it away, so its
+  // pin holds for exactly as long as the act is on stage.
+  function secSpan(i) {
+    var a = i === 0 ? 0 : dwells[i].a;
+    var b = i < trans.length ? trans[i].b : dwells[i].b;
+    return [a, b];
+  }
   var unit = 0, lastW = 0;
   function sizeTrack(force) {
     var w = innerWidth, h = innerHeight;
     if (!force && w === lastW && Math.abs(h - unit) < 120) return;
     lastW = w; unit = Math.max(h, 480);
-    track.style.height = Math.round(TOTAL * unit + innerHeight) + 'px';
+    var y = 0;
+    secs.forEach(function (sec, i) {
+      var sp = secSpan(+sec.dataset.scene);
+      var end = Math.round(sp[1] * unit);
+      var hgt = end - y + (i === secs.length - 1 ? innerHeight : 0);
+      sec.style.height = hgt + 'px';
+      y = end;
+    });
   }
 
   /* ── webgl ─────────────────────────────────────────────── */
@@ -123,13 +143,19 @@
     'varying vec2 vUv;',
     'uniform sampler2D uA,uB;',
     'uniform vec2 uRes,uPt;',
-    'uniform float uP,uMode,uPaperA,uPaperB;',
+    'uniform float uP,uMode,uPaperA,uPaperB,uT,uDust,uFlare;',
     'uniform vec4 uWinA,uWinB;',
 
     'float hash(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}',
     'float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);',
     '  return mix(mix(hash(i),hash(i+vec2(1.,0.)),u.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),u.x),u.y);}',
     'float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*noise(p);p*=2.03;a*=.5;}return v;}',
+    'float mote(vec2 uv,float sc,float t,float seed){',
+    '  vec2 g=uv*vec2(uRes.x/uRes.y,1.)*sc;g.y-=t;g.x+=sin(g.y*.45+seed)*.35;',
+    '  vec2 id=floor(g);vec2 f=fract(g)-.5;float h=hash(id+seed);',
+    '  vec2 o=vec2(hash(id+seed+1.3),hash(id+seed+2.7))-.5;',
+    '  float d=length(f-o*.7);',
+    '  return step(.9,h)*(smoothstep(.13,0.,d)+.35*smoothstep(.34,0.,d))*(.45+.55*hash(id+seed+5.1));}',
 
     // parchment, made rather than loaded
     'vec3 paper(vec2 uv){',
@@ -202,7 +228,7 @@
     '    float t=p*1.80-.18;',
     '    float bm=1.-smoothstep(t-.10,t,e);',
     '    float near=exp(-abs(e-t)*9.);',
-    '    vec3 Aw=texA(uv+vec2(near*.06*(1.-bm),0.));',
+    '    vec3 Aw=texA(uv+vec2(near*.028*(1.-bm),0.));',
     '    col=mix(Aw,texB(uv),bm);',
     '    col=mix(col,vec3(.89,.77,.56),.45*exp(-pow((e-t)*11.,2.))*(1.-p*.6));',
     '  }',
@@ -267,6 +293,18 @@
     // 10 · plain cross-fade
     '  else if(m==10){ col=mix(A,texB(uv),smoothstep(0.,1.,p)); }',
 
+    // gold motes, carried by scroll: two depths, the near ones faster
+    '  if(uDust>0.){',
+    '    float md=mote(uv,7.,uT*2.4,0.)*1.0+mote(uv,15.,uT*1.4,9.)*.65;',
+    '    col+=vec3(1.,.85,.55)*md*uDust*.42;',
+    '  }',
+    // as an act settles, one slow band of warm light crosses it
+    '  if(uFlare>0.&&uFlare<1.){',
+    '    float e=uv.x*.78+(1.-uv.y)*.34;float pos=uFlare*1.55-.28;',
+    '    float band=exp(-pow((e-pos)*3.4,2.))+.35*exp(-pow((e-pos+.12)*9.,2.));',
+    '    col+=vec3(1.,.86,.62)*band*.17*sin(3.14159*uFlare);',
+    '  }',
+
     // the painting, finished: a little grain, a little vignette
     '  vec2 q=uv-.5;',
     '  col*=1.-.20*dot(q*vec2(1.2,1.),q*vec2(1.2,1.));',
@@ -298,7 +336,7 @@
       var loc = gl.getAttribLocation(prog, 'p');
       gl.enableVertexAttribArray(loc);
       gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-      ['uA', 'uB', 'uRes', 'uPt', 'uP', 'uMode', 'uPaperA', 'uPaperB', 'uWinA', 'uWinB'].forEach(function (n) {
+      ['uA', 'uB', 'uRes', 'uPt', 'uP', 'uMode', 'uPaperA', 'uPaperB', 'uWinA', 'uWinB', 'uT', 'uDust', 'uFlare'].forEach(function (n) {
         U[n] = gl.getUniformLocation(prog, n);
       });
       gl.uniform1i(U.uA, 0); gl.uniform1i(U.uB, 1);
@@ -310,9 +348,39 @@
     }
   }
 
-  /* ── images / textures ─────────────────────────────────── */
+  /* ── images, films, textures ───────────────────────────── */
+  // Each scene starts as its still painting (the film's first frame),
+  // so something is on stage at once; the film takes over as soon as
+  // it has a frame to give.
   var imgs = [], texs = [], aspect = [];
+  var vids = [], vidOK = [], dirty = [];
   var useMobile = false;
+
+  // H.264 decodes in hardware almost everywhere, which matters for
+  // seeking; VP9 covers Chromium builds shipped without it.
+  var VFMT = (function () {
+    var v = document.createElement('video');
+    if (v.canPlayType('video/mp4; codecs="avc1.640028"')) return 'mp4';
+    if (v.canPlayType('video/webm; codecs="vp9"')) return 'webm';
+    return null;
+  })();
+  var holder = document.createElement('div');
+  holder.className = 'vids'; holder.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(holder);
+
+  function upload(i, src) {
+    if (!gl) return;
+    if (!texs[i]) {
+      texs[i] = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, texs[i]);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    } else gl.bindTexture(gl.TEXTURE_2D, texs[i]);
+    try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, src); }
+    catch (e) { /* a frame not yet decodable — keep the last one */ }
+  }
 
   function load(i) {
     var sc = SCENES[i];
@@ -320,23 +388,59 @@
     var im = new Image();
     im.decoding = 'async';
     im.onload = function () {
+      if (vidOK[i]) return;                      // the film got here first
       aspect[i] = im.naturalWidth / im.naturalHeight;
-      if (gl) {
-        var t = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, t);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, im);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        texs[i] = t;
-      }
+      upload(i, im);
       kick();
     };
     im.src = 'assets/img/' + sc.img + (useMobile ? '-m' : '') + '.webp';
     imgs[i] = im;
+    loadVid(i);
   }
-  function ready(i) { return SCENES[i].paper || (gl ? !!texs[i] : !!(imgs[i] && imgs[i].complete && aspect[i])); }
+
+  function loadVid(i) {
+    var sc = SCENES[i];
+    if (reduced || !VFMT || !sc || sc.paper || vids[i]) return;
+    var v = document.createElement('video');
+    v.muted = true; v.playsInline = true; v.preload = 'auto';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+    v.disableRemotePlayback = true;
+    function fresh() { if (v.readyState >= 2) { vidOK[i] = true; dirty[i] = true; kick(); } }
+    v.addEventListener('loadeddata', fresh);
+    v.addEventListener('seeked', fresh);
+    v.src = 'assets/video/' + sc.img + '.' + VFMT;
+    holder.appendChild(v);
+    v.load();                                    // fetches data — never starts playback
+    vids[i] = v;
+  }
+
+  function ready(i) {
+    if (SCENES[i].paper) return true;
+    if (gl) return !!texs[i];
+    return vidOK[i] || !!(imgs[i] && imgs[i].complete && aspect[i]);
+  }
+
+  // where scroll wants scene i's film: its whole life on stage, from the
+  // transition that brings it in to the one that takes it away
+  function filmTime(i, t) {
+    var v = vids[i], l = life(i);
+    if (!v || !v.duration || !isFinite(v.duration)) return 0;
+    return clamp01((t - l[0]) / (l[1] - l[0])) * (v.duration - 0.05);
+  }
+  function scrub(i, t) {
+    var v = vids[i];
+    if (!v || v.readyState < 1 || v.seeking) return;
+    var want = filmTime(i, t);
+    if (Math.abs(v.currentTime - want) < 1 / 48) return;
+    try { v.currentTime = want; } catch (e) { /* not seekable yet */ }
+  }
+  function refresh(i) {
+    if (!dirty[i] || !vids[i] || vids[i].readyState < 2) return;
+    dirty[i] = false;
+    var v = vids[i];
+    if (v.videoWidth) aspect[i] = v.videoWidth / v.videoHeight;
+    upload(i, v);
+  }
 
   /* ── geometry ──────────────────────────────────────────── */
   var cw = 1, ch = 1;
@@ -380,7 +484,7 @@
   function kb(i, t) {
     if (reduced) return 1;
     var l = life(i);
-    return 1 + 0.075 * clamp01((t - l[0]) / (l[1] - l[0]));
+    return 1 + 0.035 * clamp01((t - l[0]) / (l[1] - l[0]));
   }
 
   /* ── draw ──────────────────────────────────────────────── */
@@ -395,6 +499,9 @@
 
     // keep the next scenes loading ahead of the reader
     load(a); load(a + 1); load(a + 2);
+    scrub(a, t); refresh(a);
+    if (b >= 0) { scrub(b, t); refresh(b); }
+    else if (a + 1 < SCENES.length) scrub(a + 1, t);   // park the next film on its first frame
     if (!ready(a)) return false;
     if (b >= 0 && !ready(b)) { mode = 0; p = 0; }
 
@@ -428,6 +535,12 @@
       gl.uniform1f(U.uPaperB, b >= 0 && SCENES[b].paper ? 1 : 0);
       gl.uniform4f(U.uWinA, wA[0], wA[1], wA[2], wA[3]);
       gl.uniform4f(U.uWinB, wB[0], wB[1], wB[2], wB[3]);
+      var dA = SCENES[a].dust, dB = b >= 0 ? SCENES[b].dust : dA;
+      gl.uniform1f(U.uT, t);
+      gl.uniform1f(U.uDust, reduced ? 0 : lerp(dA, dB, smooth(0.2, 0.8, p)));
+      var fl = -1;
+      if (!reduced && s.kind === 'dwell' && !SCENES[a].paper && a > 0) fl = clamp01((t - s.a) / ((s.b - s.a) * 0.55));
+      gl.uniform1f(U.uFlare, fl);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     } else {
       draw2d(a, b, p, wA, wB);
@@ -441,7 +554,8 @@
     function paint(i, w, alpha) {
       c.globalAlpha = alpha;
       if (SCENES[i].paper) { c.fillStyle = '#ecdcba'; c.fillRect(0, 0, cw, ch); return; }
-      var im = imgs[i], iw = im.naturalWidth, ih = im.naturalHeight;
+      var im = vidOK[i] ? vids[i] : imgs[i];
+      var iw = im.videoWidth || im.naturalWidth, ih = im.videoHeight || im.naturalHeight;
       c.drawImage(im, w[0] * iw, (1 - w[1] - w[3]) * ih, w[2] * iw, w[3] * ih, 0, 0, cw, ch);
     }
     paint(a, wA, 1);
@@ -450,19 +564,49 @@
   }
 
   /* ── the words ─────────────────────────────────────────── */
-  // A scene's words arrive only after it has settled, one part at a
-  // time, and leave together just before the next transition begins.
+  // A scene's parts arrive only after it has settled, one at a time in
+  // data-o order, each with its own entrance (data-fx), and leave
+  // together just before the next transition begins.
+  //   rise     lifts in            num      settles out of a blur
+  //   draw     a rule drawn L→R    blur     focuses in
+  //   lines    each verse line rises out of its own line box
+  //   letters  each glyph arrives on its own
+  function prepPart(el) {
+    var fx = el.dataset.fx || 'rise', subs = [];
+    if (fx === 'lines') {
+      var lines = el.innerHTML.split(/<br\s*\/?>/i);
+      el.innerHTML = lines.map(function (h) { return '<span class="ln"><i>' + h.trim() + '</i></span>'; }).join('');
+      subs = [].slice.call(el.querySelectorAll('.ln > i'));
+    } else if (fx === 'letters') {
+      var text = el.textContent;
+      el.textContent = '';
+      var sr = document.createElement('span');
+      sr.className = 'sr'; sr.textContent = text;
+      el.appendChild(sr);
+      Array.from(text).forEach(function (c) {
+        var sp = document.createElement('span');
+        sp.className = 'ch'; sp.setAttribute('aria-hidden', 'true'); sp.textContent = c;
+        el.appendChild(sp); subs.push(sp);
+      });
+    }
+    return { el: el, o: +el.dataset.o, fx: fx, subs: subs };
+  }
+
   function wordsFor(scene, t) {
     var d = dwells[scene];
     var len = d.b - d.a, local = (t - d.a) / len;
     var last = scene === SCENES.length - 1;
-    var first = scene === 0;
-    var out = last ? 1 : 1 - smooth(0.80, 0.97, local);
-    return { local: local, out: out, first: first };
+    var out = last ? 1 : 1 - smooth(0.78, 0.95, local);
+    return { local: local, out: out, first: scene === 0 };
   }
 
   var bootT0 = performance.now();
+  var START = 0.05, STEP = 0.06, WIN = 0.17;    // in units of the act's dwell
+
   function setWords(t) {
+    // the prologue's clock is time since load (it greets the reader);
+    // every other act's clock is its own scroll progress
+    var bootClock = (performance.now() - bootT0) / 4200;
     for (var k = 0; k < acts.length; k++) {
       var A = acts[k], w = wordsFor(A.scene, t);
       var isLast = A.scene === SCENES.length - 1;
@@ -471,21 +615,51 @@
       A.el.classList.toggle('is-live', live);
       A.el.setAttribute('aria-hidden', live ? 'false' : 'true');
       if (!live) continue;
+      var clock = w.first ? bootClock : w.local;
 
       for (var j = 0; j < A.parts.length; j++) {
-        var el = A.parts[j], o = +el.dataset.o, a;
-        if (w.first) {
-          // the opening lines arrive once, on load, in the same cadence
-          var since = (performance.now() - bootT0) / 1000;
-          a = reduced ? 1 : smooth(0.15 + o * 0.22, 0.95 + o * 0.22, since);
-        } else {
-          var s0 = 0.06 + o * 0.075;
-          a = reduced ? smooth(0.02, 0.10, w.local) : smooth(s0, s0 + 0.20, w.local);
+        var P = A.parts[j], el = P.el;
+        var s0 = START + P.o * STEP;
+        var a = reduced ? smooth(0, 0.08, clock) : smooth(s0, s0 + WIN, clock);
+        var out = w.out, lift = (1 - out) * 8;
+
+        if (reduced) {
+          el.style.opacity = (a * out).toFixed(3);
+          continue;
         }
-        var op = a * w.out;
-        var y = reduced ? 0 : (1 - a) * 14 - (1 - w.out) * 8;
-        el.style.opacity = op.toFixed(3);
-        el.style.transform = 'translate3d(0,' + y.toFixed(2) + 'px,0)';
+        if (P.fx === 'num') {
+          el.style.opacity = (a * out * 0.92).toFixed(3);
+          el.style.transform = 'translate3d(0,' + ((1 - a) * 12 - lift).toFixed(2) + 'px,0) scale(' + (1.08 - 0.08 * a).toFixed(4) + ')';
+          el.style.filter = a < 0.999 ? 'blur(' + ((1 - a) * 9).toFixed(2) + 'px)' : '';
+        } else if (P.fx === 'draw') {
+          el.style.opacity = (Math.min(1, a * 4) * out).toFixed(3);
+          el.style.transform = 'translate3d(0,' + (-lift).toFixed(2) + 'px,0) scaleX(' + (1 - Math.pow(1 - a, 3)).toFixed(4) + ')';
+        } else if (P.fx === 'blur') {
+          el.style.opacity = (a * out).toFixed(3);
+          el.style.transform = 'translate3d(0,' + ((1 - a) * 6 - lift).toFixed(2) + 'px,0)';
+          el.style.filter = a < 0.999 ? 'blur(' + ((1 - a) * 5).toFixed(2) + 'px)' : '';
+        } else if (P.fx === 'lines') {
+          el.style.opacity = (a > 0 ? out : 0).toFixed(3);
+          el.style.transform = 'translate3d(0,' + (-lift).toFixed(2) + 'px,0)';
+          for (var li = 0; li < P.subs.length; li++) {
+            var l0 = s0 + li * 0.055, la = smooth(l0, l0 + WIN, clock);
+            var e = 1 - Math.pow(1 - la, 3);
+            P.subs[li].style.transform = 'translate3d(0,' + ((1 - e) * 108).toFixed(2) + '%,0)';
+            P.subs[li].style.opacity = la.toFixed(3);
+          }
+        } else if (P.fx === 'letters') {
+          el.style.opacity = (a > 0 ? out : 0).toFixed(3);
+          el.style.transform = 'translate3d(0,' + (-lift).toFixed(2) + 'px,0)';
+          var n = P.subs.length, span = WIN * 1.6, per = n > 1 ? span / (n - 1) : 0;
+          for (var ci = 0; ci < n; ci++) {
+            var c0 = s0 + ci * per, ca = smooth(c0, c0 + WIN * 0.8, clock);
+            P.subs[ci].style.opacity = ca.toFixed(3);
+            P.subs[ci].style.transform = 'translate3d(0,' + ((1 - ca) * 0.42).toFixed(3) + 'em,0)';
+          }
+        } else {
+          el.style.opacity = (a * out).toFixed(3);
+          el.style.transform = 'translate3d(0,' + ((1 - a) * 14 - lift).toFixed(2) + 'px,0)';
+        }
       }
     }
   }
@@ -534,7 +708,7 @@
     var st = draw(cur);
     if (st) { setWords(cur); setChrome(st, cur); }
 
-    var booting = cur < dwells[0].b && (now - bootT0) < 2200;
+    var booting = cur < dwells[0].b && (now - bootT0) < 4200;
     if (cur !== target || !st || booting) kick();
     else last = 0;
   }
@@ -543,7 +717,7 @@
   /* ── navigation ────────────────────────────────────────── */
   function jumpTo(scene) {
     var d = dwells[scene];
-    var t = scene === 0 ? 0 : d.a + (d.b - d.a) * 0.42;
+    var t = scene === 0 ? 0 : d.a + (d.b - d.a) * 0.5;
     scrollTo({ top: t * unit, behavior: reduced ? 'auto' : 'smooth' });
   }
   document.addEventListener('click', function (e) {
@@ -569,5 +743,9 @@
 
   // test hook: lets an automated check set the timeline directly
   window.__B = { TOTAL: TOTAL, dwells: dwells, trans: trans, unit: function () { return unit; },
-                 state: function () { var s = segAt(cur); return { cur: cur, kind: s.kind, i: s.i, gl: !!gl }; } };
+                 state: function () {
+                   var s = segAt(cur), v = vids[s.i];
+                   return { cur: cur, kind: s.kind, i: s.i, gl: !!gl, fmt: VFMT, film: !!vidOK[s.i],
+                            ft: v ? +v.currentTime.toFixed(3) : null, want: v ? +filmTime(s.i, cur).toFixed(3) : null };
+                 } };
 })();
