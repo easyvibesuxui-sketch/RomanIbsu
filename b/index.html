@@ -16,16 +16,207 @@
 </head>
 <body>
 
-<!-- ── the stage ──────────────────────────────────────────────
-     One framed card, fixed to the viewport. Its canvas shows the
-     scene videos, scrubbed by scroll, and every transition between
-     them. Nothing here plays on its own: a video advances only when
-     the page is scrolled. -->
-<div class="stage">
-  <figure class="card" id="card">
-    <canvas class="scene-canvas" id="gl" aria-hidden="true"></canvas>
-    <div class="scrim" aria-hidden="true"></div>
+<!-- ── the stack ──────────────────────────────────────────────
+     Each act is a card on a sticky pin. Scrolled to, a card rises from
+     below, pins to the screen and holds while its film runs; the next
+     card then slides up over it while it settles back and dims. All
+     pins share one parent, so every card stays stuck beneath the ones
+     that follow — a deck, built by the reader's scroll.
 
+     Films never play on their own: scroll writes their currentTime.
+     An act's parts arrive in data-o order once its card has pinned,
+     each with the entrance named in data-fx. Quotations from the poem
+     are set in „ “ ; lines without them are narration. -->
+<main class="stack" id="stack">
+  <section class="pin" id="act-0" data-scene="0" style="z-index:1">
+    <figure class="card card--prologue">
+      <video class="film" muted playsinline preload="none" disableremoteplayback
+             data-name="00-prologue" aria-hidden="true"></video>
+      <div class="scrim" aria-hidden="true"></div>
+      <div class="flare" aria-hidden="true"></div>
+      <article class="act act--prologue">
+        <p class="label" data-o="0" data-fx="rise">შოთა რუსთაველი</p>
+        <h1 class="title" data-o="1" data-fx="letters">ვეფხისტყაოსანი</h1>
+        <span class="rule" data-o="2" data-fx="draw" aria-hidden="true"></span>
+        <p class="verse" data-o="3" data-fx="lines">„რომელმან შექმნა სამყარო<br>ძალითა მით ძლიერითა“</p>
+        <p class="cue" data-o="4" data-fx="rise"><span aria-hidden="true"></span>ჩამოსქროლე — ამბავი იშლება</p>
+      </article>
+      <div class="dim" aria-hidden="true"></div>
+    </figure>
+  </section>
+  <div class="gap" aria-hidden="true"></div>
+  <section class="pin" id="act-1" data-scene="1" style="z-index:2">
+    <figure class="card">
+      <video class="film" muted playsinline preload="none" disableremoteplayback
+             data-name="01-tinatin" aria-hidden="true"></video>
+      <div class="scrim" aria-hidden="true"></div>
+      <div class="flare" aria-hidden="true"></div>
+      <article class="act">
+        <span class="numeral" data-o="0" data-fx="num" aria-hidden="true">II</span>
+        <p class="label" data-o="1" data-fx="rise">თინათინის მეფობა</p>
+        <span class="rule" data-o="2" data-fx="draw" aria-hidden="true"></span>
+        <p class="verse" data-o="3" data-fx="lines">„ლეკვი ლომისა სწორია,<br>ძუ იყოს, თუნდა ხვადია.“</p>
+        <p class="gloss" data-o="5" data-fx="blur">არაბეთის მეფე როსტევანი ტახტს თავის ასულს უთმობს.</p>
+      </article>
+      <div class="dim" aria-hidden="true"></div>
+    </figure>
+  </section>
+  <div class="gap" aria-hidden="true"></div>
+  <section class="pin" id="act-2" data-scene="2" style="z-index:3">
+    <figure class="card">
+      <video class="film" muted playsinline preload="none" disableremoteplayback
+             data-name="02-stranger" aria-hidden="true"></video>
+      <div class="scrim" aria-hidden="true"></div>
+      <div class="flare" aria-hidden="true"></div>
+      <article class="act">
+        <span class="numeral" data-o="0" data-fx="num" aria-hidden="true">III</span>
+        <p class="label" data-o="1" data-fx="rise">უცხო მოყმე</p>
+        <span class="rule" data-o="2" data-fx="draw" aria-hidden="true"></span>
+        <p class="verse" data-o="3" data-fx="lines">მდინარის პირას იჯდა მოყმე,<br>ვეფხის ტყავით მოსილი.</p>
+        <p class="gloss" data-o="5" data-fx="blur">მეფემ იგი ნადირობისას იხილა — და ვერავინ შეიპყრო.</p>
+      </article>
+      <div class="dim" aria-hidden="true"></div>
+    </figure>
+  </section>
+  <div class="gap" aria-hidden="true"></div>
+  <section class="pin" id="act-3" data-scene="3" style="z-index:4">
+    <figure class="card">
+      <video class="film" muted playsinline preload="none" disableremoteplayback
+             data-name="03-quest" aria-hidden="true"></video>
+      <div class="scrim" aria-hidden="true"></div>
+      <div class="flare" aria-hidden="true"></div>
+      <article class="act">
+        <span class="numeral" data-o="0" data-fx="num" aria-hidden="true">IV</span>
+        <p class="label" data-o="1" data-fx="rise">ავთანდილის ძებნა</p>
+        <span class="rule" data-o="2" data-fx="draw" aria-hidden="true"></span>
+        <p class="verse" data-o="3" data-fx="lines">„ჭირსა შიგან გამაგრება,<br>ასრე უნდა, ვით ქვითკირსა.“</p>
+        <p class="gloss" data-o="5" data-fx="blur">თინათინმა ავთანდილი გაგზავნა — სამი წლით, უცნობის საძიებლად.</p>
+      </article>
+      <div class="dim" aria-hidden="true"></div>
+    </figure>
+  </section>
+  <div class="gap" aria-hidden="true"></div>
+  <section class="pin" id="act-4" data-scene="4" style="z-index:5">
+    <figure class="card">
+      <video class="film" muted playsinline preload="none" disableremoteplayback
+             data-name="04-sky" aria-hidden="true"></video>
+      <div class="scrim" aria-hidden="true"></div>
+      <div class="flare" aria-hidden="true"></div>
+      <article class="act act--breath">
+        <p class="verse" data-o="0" data-fx="letters">სამი წელი.</p>
+        <p class="verse" data-o="2" data-fx="letters">ერთი გზა.</p>
+      </article>
+      <div class="dim" aria-hidden="true"></div>
+    </figure>
+  </section>
+  <div class="gap" aria-hidden="true"></div>
+  <section class="pin" id="act-5" data-scene="5" style="z-index:6">
+    <figure class="card">
+      <video class="film" muted playsinline preload="none" disableremoteplayback
+             data-name="05-nestan" aria-hidden="true"></video>
+      <div class="scrim" aria-hidden="true"></div>
+      <div class="flare" aria-hidden="true"></div>
+      <article class="act">
+        <span class="numeral" data-o="0" data-fx="num" aria-hidden="true">V</span>
+        <p class="label" data-o="1" data-fx="rise">ნესტან-დარეჯანი</p>
+        <span class="rule" data-o="2" data-fx="draw" aria-hidden="true"></span>
+        <p class="verse" data-o="3" data-fx="lines">ქაჯეთის ციხეში დატყვევებული<br>წერილს უგზავნის ტარიელს.</p>
+        <p class="gloss" data-o="5" data-fx="blur">ტარიელის სატრფო, ინდოეთის მეფის ასული.</p>
+      </article>
+      <div class="dim" aria-hidden="true"></div>
+    </figure>
+  </section>
+  <div class="gap" aria-hidden="true"></div>
+  <section class="pin" id="act-6" data-scene="6" style="z-index:7">
+    <figure class="card">
+      <video class="film" muted playsinline preload="none" disableremoteplayback
+             data-name="06-brothers" aria-hidden="true"></video>
+      <div class="scrim" aria-hidden="true"></div>
+      <div class="flare" aria-hidden="true"></div>
+      <article class="act">
+        <span class="numeral" data-o="0" data-fx="num" aria-hidden="true">VI</span>
+        <p class="label" data-o="1" data-fx="rise">ძმადნაფიცნი</p>
+        <span class="rule" data-o="2" data-fx="draw" aria-hidden="true"></span>
+        <p class="verse" data-o="3" data-fx="lines">ავთანდილი, ტარიელი, ფრიდონი —<br>სამი ხმალი, ერთი ფიცი.</p>
+        <p class="gloss" data-o="5" data-fx="blur">მეგობრობა და ერთგულება — პოემის ხერხემალი.</p>
+      </article>
+      <div class="dim" aria-hidden="true"></div>
+    </figure>
+  </section>
+  <div class="gap" aria-hidden="true"></div>
+  <section class="pin" id="act-7" data-scene="7" style="z-index:8">
+    <figure class="card">
+      <video class="film" muted playsinline preload="none" disableremoteplayback
+             data-name="07-kajeti" aria-hidden="true"></video>
+      <div class="scrim" aria-hidden="true"></div>
+      <div class="flare" aria-hidden="true"></div>
+      <article class="act">
+        <span class="numeral" data-o="0" data-fx="num" aria-hidden="true">VII</span>
+        <p class="label" data-o="1" data-fx="rise">ქაჯეთის ციხე</p>
+        <span class="rule" data-o="2" data-fx="draw" aria-hidden="true"></span>
+        <p class="verse" data-o="3" data-fx="lines">„სჯობს სიცოცხლესა ნაძრახსა<br>სიკვდილი სახელოვანი.“</p>
+        <p class="gloss" data-o="5" data-fx="blur">სამმა რაინდმა ქაჯეთი აიღო და ნესტანი იხსნა.</p>
+      </article>
+      <div class="dim" aria-hidden="true"></div>
+    </figure>
+  </section>
+  <div class="gap" aria-hidden="true"></div>
+  <section class="pin" id="act-8" data-scene="8" style="z-index:9">
+    <figure class="card">
+      <video class="film" muted playsinline preload="none" disableremoteplayback
+             data-name="08-feast" aria-hidden="true"></video>
+      <div class="scrim" aria-hidden="true"></div>
+      <div class="flare" aria-hidden="true"></div>
+      <article class="act">
+        <span class="numeral" data-o="0" data-fx="num" aria-hidden="true">VIII</span>
+        <p class="label" data-o="1" data-fx="rise">ეპილოგი</p>
+        <span class="rule" data-o="2" data-fx="draw" aria-hidden="true"></span>
+        <p class="verse" data-o="3" data-fx="lines">„ბოროტსა სძლია კეთილმან,<br>არსება მისი გრძელია.“</p>
+        <p class="gloss" data-o="5" data-fx="blur">ორი ქორწილი — ტარიელისა და ნესტანის, ავთანდილისა და თინათინის.</p>
+      </article>
+      <div class="dim" aria-hidden="true"></div>
+    </figure>
+  </section>
+  <div class="gap" aria-hidden="true"></div>
+  <section class="pin" id="act-9" data-scene="9" style="z-index:10">
+    <figure class="card">
+      <video class="film" muted playsinline preload="none" disableremoteplayback
+             data-name="09-colophon" aria-hidden="true"></video>
+      <div class="scrim" aria-hidden="true"></div>
+      <div class="flare" aria-hidden="true"></div>
+      <article class="act">
+        <p class="label" data-o="0" data-fx="rise">ბოლოთქმა</p>
+        <span class="rule" data-o="1" data-fx="draw" aria-hidden="true"></span>
+        <p class="verse" data-o="2" data-fx="lines">„ესე ამბავი სპარსული,<br>ქართულად ნათარგმანები“</p>
+        <p class="gloss" data-o="4" data-fx="blur">შოთა რუსთაველი · XII საუკუნე</p>
+      </article>
+      <div class="dim" aria-hidden="true"></div>
+    </figure>
+  </section>
+  <div class="gap" aria-hidden="true"></div>
+  <section class="pin" id="act-10" data-scene="10" style="z-index:11">
+    <figure class="card card--paper">
+      <div class="parchment" aria-hidden="true"></div>
+      <article class="act act--end on-paper">
+        <p class="label" data-o="0" data-fx="rise">დასასრული</p>
+        <p class="end-title" data-o="1" data-fx="letters">ვეფხისტყაოსანი</p>
+        <span class="rule rule--center" data-o="2" data-fx="draw" aria-hidden="true"></span>
+        <p class="gloss" data-o="3" data-fx="blur">რვა აქტი · შოთა რუსთაველის ლეგენდა</p>
+        <p class="end-links" data-o="4" data-fx="rise">
+        <button type="button" class="pill" data-jump="0">თავიდან</button>
+        <a class="pill pill--ghost" href="../">A ვერსია</a>
+        </p>
+      </article>
+      <div class="dim" aria-hidden="true"></div>
+    </figure>
+  </section>
+  <div class="gap" aria-hidden="true"></div>
+</main>
+
+<!-- chrome and gold motes float over whichever card is on top -->
+<canvas class="motes" id="motes" aria-hidden="true"></canvas>
+<div class="hud" id="hud">
+  <div class="hud__frame" id="hudFrame">
     <header class="chrome">
       <a class="brand" href="#act-0" data-jump="0" aria-label="ვეფხისტყაოსანი — დასაწყისი">ვეფხისტყაოსანი</a>
       <nav class="acts" aria-label="აქტები">
@@ -39,155 +230,12 @@
         <button type="button" data-jump="8" aria-label="VIII — ეპილოგი">VIII</button>
       </nav>
     </header>
-
     <footer class="meter" aria-hidden="true">
       <span class="meter__bar"><i id="meterFill"></i></span>
       <span class="meter__count"><b id="actNow">I</b><span>/</span>VIII</span>
     </footer>
-  </figure>
+  </div>
 </div>
-
-<!-- ── the acts ───────────────────────────────────────────────
-     Each act is a tall section with a sticky pin. While the pin holds,
-     scroll runs the act's video; once it has settled, the act's parts
-     arrive one by one in data-o order (numeral, label, rule, lines,
-     gloss) with the entrance named in data-fx, then leave together
-     before the next transition. Quotations from the poem are set in
-     „ “ ; lines without them are narration. -->
-<main class="story" id="story">
-
-  <section class="sec" id="act-0" data-scene="0">
-    <div class="pin"><div class="frame">
-      <article class="act act--prologue">
-        <p class="label" data-o="0" data-fx="rise">შოთა რუსთაველი</p>
-        <h1 class="title" data-o="1" data-fx="letters">ვეფხისტყაოსანი</h1>
-        <span class="rule" data-o="2" data-fx="draw" aria-hidden="true"></span>
-        <p class="verse" data-o="3" data-fx="lines">„რომელმან შექმნა სამყარო<br>ძალითა მით ძლიერითა“</p>
-        <p class="cue" data-o="4" data-fx="rise"><span aria-hidden="true"></span>ჩამოსქროლე — ამბავი იშლება</p>
-      </article>
-    </div></div>
-  </section>
-
-  <section class="sec" id="act-1" data-scene="1">
-    <div class="pin"><div class="frame">
-      <article class="act">
-        <span class="numeral" data-o="0" data-fx="num" aria-hidden="true">II</span>
-        <p class="label" data-o="1" data-fx="rise">თინათინის მეფობა</p>
-        <span class="rule" data-o="2" data-fx="draw" aria-hidden="true"></span>
-        <p class="verse" data-o="3" data-fx="lines">„ლეკვი ლომისა სწორია,<br>ძუ იყოს, თუნდა ხვადია.“</p>
-        <p class="gloss" data-o="5" data-fx="blur">არაბეთის მეფე როსტევანი ტახტს თავის ასულს უთმობს.</p>
-      </article>
-    </div></div>
-  </section>
-
-  <section class="sec" id="act-2" data-scene="2">
-    <div class="pin"><div class="frame">
-      <article class="act">
-        <span class="numeral" data-o="0" data-fx="num" aria-hidden="true">III</span>
-        <p class="label" data-o="1" data-fx="rise">უცხო მოყმე</p>
-        <span class="rule" data-o="2" data-fx="draw" aria-hidden="true"></span>
-        <p class="verse" data-o="3" data-fx="lines">მდინარის პირას იჯდა მოყმე,<br>ვეფხის ტყავით მოსილი.</p>
-        <p class="gloss" data-o="5" data-fx="blur">მეფემ იგი ნადირობისას იხილა — და ვერავინ შეიპყრო.</p>
-      </article>
-    </div></div>
-  </section>
-
-  <section class="sec" id="act-3" data-scene="3">
-    <div class="pin"><div class="frame">
-      <article class="act">
-        <span class="numeral" data-o="0" data-fx="num" aria-hidden="true">IV</span>
-        <p class="label" data-o="1" data-fx="rise">ავთანდილის ძებნა</p>
-        <span class="rule" data-o="2" data-fx="draw" aria-hidden="true"></span>
-        <p class="verse" data-o="3" data-fx="lines">„ჭირსა შიგან გამაგრება,<br>ასრე უნდა, ვით ქვითკირსა.“</p>
-        <p class="gloss" data-o="5" data-fx="blur">თინათინმა ავთანდილი გაგზავნა — სამი წლით, უცნობის საძიებლად.</p>
-      </article>
-    </div></div>
-  </section>
-
-  <section class="sec" id="act-4" data-scene="4">
-    <div class="pin"><div class="frame">
-      <article class="act act--breath">
-        <p class="verse" data-o="0" data-fx="letters">სამი წელი.</p>
-        <p class="verse" data-o="2" data-fx="letters">ერთი გზა.</p>
-      </article>
-    </div></div>
-  </section>
-
-  <section class="sec" id="act-5" data-scene="5">
-    <div class="pin"><div class="frame">
-      <article class="act">
-        <span class="numeral" data-o="0" data-fx="num" aria-hidden="true">V</span>
-        <p class="label" data-o="1" data-fx="rise">ნესტან-დარეჯანი</p>
-        <span class="rule" data-o="2" data-fx="draw" aria-hidden="true"></span>
-        <p class="verse" data-o="3" data-fx="lines">ქაჯეთის ციხეში დატყვევებული<br>წერილს უგზავნის ტარიელს.</p>
-        <p class="gloss" data-o="5" data-fx="blur">ტარიელის სატრფო, ინდოეთის მეფის ასული.</p>
-      </article>
-    </div></div>
-  </section>
-
-  <section class="sec" id="act-6" data-scene="6">
-    <div class="pin"><div class="frame">
-      <article class="act">
-        <span class="numeral" data-o="0" data-fx="num" aria-hidden="true">VI</span>
-        <p class="label" data-o="1" data-fx="rise">ძმადნაფიცნი</p>
-        <span class="rule" data-o="2" data-fx="draw" aria-hidden="true"></span>
-        <p class="verse" data-o="3" data-fx="lines">ავთანდილი, ტარიელი, ფრიდონი —<br>სამი ხმალი, ერთი ფიცი.</p>
-        <p class="gloss" data-o="5" data-fx="blur">მეგობრობა და ერთგულება — პოემის ხერხემალი.</p>
-      </article>
-    </div></div>
-  </section>
-
-  <section class="sec" id="act-7" data-scene="7">
-    <div class="pin"><div class="frame">
-      <article class="act">
-        <span class="numeral" data-o="0" data-fx="num" aria-hidden="true">VII</span>
-        <p class="label" data-o="1" data-fx="rise">ქაჯეთის ციხე</p>
-        <span class="rule" data-o="2" data-fx="draw" aria-hidden="true"></span>
-        <p class="verse" data-o="3" data-fx="lines">„სჯობს სიცოცხლესა ნაძრახსა<br>სიკვდილი სახელოვანი.“</p>
-        <p class="gloss" data-o="5" data-fx="blur">სამმა რაინდმა ქაჯეთი აიღო და ნესტანი იხსნა.</p>
-      </article>
-    </div></div>
-  </section>
-
-  <section class="sec" id="act-8" data-scene="8">
-    <div class="pin"><div class="frame">
-      <article class="act">
-        <span class="numeral" data-o="0" data-fx="num" aria-hidden="true">VIII</span>
-        <p class="label" data-o="1" data-fx="rise">ეპილოგი</p>
-        <span class="rule" data-o="2" data-fx="draw" aria-hidden="true"></span>
-        <p class="verse" data-o="3" data-fx="lines">„ბოროტსა სძლია კეთილმან,<br>არსება მისი გრძელია.“</p>
-        <p class="gloss" data-o="5" data-fx="blur">ორი ქორწილი — ტარიელისა და ნესტანის, ავთანდილისა და თინათინის.</p>
-      </article>
-    </div></div>
-  </section>
-
-  <section class="sec" id="act-9" data-scene="9">
-    <div class="pin"><div class="frame">
-      <article class="act">
-        <p class="label" data-o="0" data-fx="rise">ბოლოთქმა</p>
-        <span class="rule" data-o="1" data-fx="draw" aria-hidden="true"></span>
-        <p class="verse" data-o="2" data-fx="lines">„ესე ამბავი სპარსული,<br>ქართულად ნათარგმანები“</p>
-        <p class="gloss" data-o="4" data-fx="blur">შოთა რუსთაველი · XII საუკუნე</p>
-      </article>
-    </div></div>
-  </section>
-
-  <section class="sec" id="act-10" data-scene="10">
-    <div class="pin"><div class="frame">
-      <article class="act act--end on-paper">
-        <p class="label" data-o="0" data-fx="rise">დასასრული</p>
-        <p class="end-title" data-o="1" data-fx="letters">ვეფხისტყაოსანი</p>
-        <span class="rule rule--center" data-o="2" data-fx="draw" aria-hidden="true"></span>
-        <p class="gloss" data-o="3" data-fx="blur">რვა აქტი · შოთა რუსთაველის ლეგენდა</p>
-        <p class="end-links" data-o="4" data-fx="rise">
-          <button type="button" class="pill" data-jump="0">თავიდან</button>
-          <a class="pill pill--ghost" href="../">A ვერსია</a>
-        </p>
-      </article>
-    </div></div>
-  </section>
-
-</main>
 
 <noscript>
   <p class="noscript">ეს გვერდი სქროლით მართულ ანიმაციას იყენებს და JavaScript სჭირდება.</p>

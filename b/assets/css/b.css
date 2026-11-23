@@ -43,35 +43,82 @@ body{
 button{ font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer; }
 :focus-visible{ outline:1.5px solid var(--gold-hi); outline-offset:3px; border-radius:2px; }
 
-/* ── stage & card ───────────────────────────────────────── */
-/* The stage and every act's pin share one geometry, so the words
-   pinned in a section sit exactly on the painting behind them. */
-.stage, .pin{
+/* ── the stack ─────────────────────────────────────────────
+   Every pin is a direct child of .stack and sticks at the top, so a
+   pinned card stays put underneath the cards that follow; the gaps
+   between pins (sized in script) are how long each act holds. */
+.stack{ position:relative; }
+.pin, .hud{
   height:100svh;
   display:grid; place-items:center;
   padding:clamp(14px, 3.4vw, 56px);
-}
-.stage{
-  position:fixed; top:0; left:0; right:0; z-index:0;
   pointer-events:none;
 }
-.card, .frame{
+.pin{ position:sticky; top:0; }
+.gap{ height:200svh; }               /* rewritten in script */
+
+.card, .hud__frame{
   position:relative; margin:0;
   width:min(100%, calc((100svh - 2 * clamp(14px, 3.4vw, 56px)) * 16 / 9));
   aspect-ratio:16 / 9;
 }
 .card{
-  border-radius:7px;
+  border-radius:8px;
   overflow:hidden;
-  background:#e8dcc4;
+  background:#2b2a28;
   box-shadow:
+    0 -24px 70px -34px rgba(24,28,44,.55),
     0 50px 110px -40px rgba(24,28,44,.55),
-    0 18px 40px -18px rgba(24,28,44,.35),
-    0 0 0 1px rgba(255,255,255,.18) inset;
-  pointer-events:auto;
+    0 18px 40px -18px rgba(24,28,44,.35);
+  transform-origin:50% 30%;
+  will-change:transform;
   isolation:isolate;
 }
-.scene-canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+.card.is-gone{ visibility:hidden; }
+
+/* the film fills the card; while a card rises it starts a little
+   large and settles, so the card reads as a window, not a sticker */
+.film{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; display:block;
+  background:#2b2a28 center / cover no-repeat;
+  transform-origin:50% 40%;
+  will-change:transform;
+}
+
+/* a card settling back under the next one goes dim */
+.dim{
+  position:absolute; inset:0; z-index:5; pointer-events:none;
+  background:#0d1018; opacity:0;
+}
+
+/* one band of warm light crosses each act as it pins */
+.flare{
+  position:absolute; top:-20%; bottom:-20%; left:0; width:55%; z-index:2;
+  pointer-events:none; opacity:0;
+  background:linear-gradient(100deg, transparent 0%, rgba(255,226,170,.0) 25%, rgba(255,226,170,.26) 50%, rgba(255,226,170,0) 75%, transparent 100%);
+  mix-blend-mode:screen;
+  will-change:transform, opacity;
+}
+
+/* parchment for the end card, made rather than loaded */
+.card--paper{ background:#e6d6b3; }
+.parchment{
+  position:absolute; inset:0;
+  background:
+    radial-gradient(120% 95% at 50% 42%, rgba(255,250,236,.55) 0%, rgba(255,250,236,0) 55%),
+    radial-gradient(140% 120% at 50% 50%, transparent 55%, rgba(120,88,40,.28) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .09' numOctaves='4' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .33 0 0 0 0 .16 0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #efe2c4, #e2cfa6);
+}
+
+/* gold motes, one canvas over the whole stack */
+.motes{ position:fixed; inset:0; width:100%; height:100%; z-index:60; pointer-events:none; }
+
+/* chrome rides above every card, on the pinned card's frame */
+.hud{ position:fixed; top:0; left:0; right:0; z-index:70; }
+.hud__frame{ pointer-events:none; }
+.hud .chrome a, .hud .chrome button{ pointer-events:auto; }
 
 /* a quiet shade under the words, never across the whole painting */
 .scrim{
@@ -79,10 +126,8 @@ button{ font:inherit; color:inherit; background:none; border:0; padding:0; curso
   background:
     radial-gradient(70% 60% at 0% 100%, rgba(10,14,26,.52) 0%, rgba(10,14,26,.18) 45%, transparent 72%),
     linear-gradient(180deg, rgba(10,14,26,.32) 0%, transparent 16%);
-  transition:opacity .6s var(--ease);
 }
-.card.is-paper .scrim{ opacity:0; }
-.card.is-prologue .scrim{
+.card--prologue .scrim{
   background:
     linear-gradient(90deg, rgba(10,14,26,.50) 0%, rgba(10,14,26,.16) 42%, transparent 62%),
     linear-gradient(180deg, rgba(10,14,26,.32) 0%, transparent 16%);
@@ -121,23 +166,18 @@ button{ font:inherit; color:inherit; background:none; border:0; padding:0; curso
 .acts button[aria-current="true"]{ opacity:1; color:var(--gold-hi); }
 .acts button[aria-current="true"]::after{ width:100%; }
 
-.card.is-paper .chrome,
-.card.is-paper .meter{ color:var(--ink); }
-.card.is-paper .acts button[aria-current="true"]{ color:#9a6a24; }
+.hud.is-paper .chrome,
+.hud.is-paper .meter{ color:var(--ink); }
+.hud.is-paper .acts button[aria-current="true"]{ color:#9a6a24; }
 
-/* ── the acts: tall sections, each with a sticky pin ────── */
-.story{ position:relative; z-index:1; pointer-events:none; }
-.sec{ position:relative; }            /* height set in script */
-.pin{ position:sticky; top:0; }
-.frame{ overflow:hidden; border-radius:7px; }
+/* ── the acts ───────────────────────────────────────────── */
 .act{
   position:absolute;
   left:var(--pad); bottom:calc(var(--pad) * 1.55);
+  z-index:3;
   width:min(46%, 34rem);
-  visibility:hidden;
 }
-.act.is-live{ visibility:visible; }
-.act.is-live .end-links{ pointer-events:auto; }
+.end-links{ pointer-events:auto; }
 .act > *{
   margin:0;
   opacity:0;
@@ -290,7 +330,7 @@ button{ font:inherit; color:inherit; background:none; border:0; padding:0; curso
   position:absolute; left:0; top:0; bottom:0; width:0;
   background:var(--gold-hi); opacity:1;
 }
-.card.is-paper .meter__bar i{ background:#9a6a24; }
+.hud.is-paper .meter__bar i{ background:#9a6a24; }
 .meter__count{
   font-family:var(--num); font-size:clamp(10.5px, .85vw, 13px); letter-spacing:.12em;
   display:flex; gap:.4em; opacity:.8;
@@ -299,8 +339,8 @@ button{ font:inherit; color:inherit; background:none; border:0; padding:0; curso
 
 /* ── portrait: the painting becomes a tall window ───────── */
 @media (max-aspect-ratio: 1/1){
-  .stage, .pin{ padding:10px; }
-  .card, .frame{
+  .pin, .hud{ padding:10px; }
+  .card, .hud__frame{
     width:100%;
     height:calc(100svh - 20px);
     aspect-ratio:auto;
@@ -311,7 +351,7 @@ button{ font:inherit; color:inherit; background:none; border:0; padding:0; curso
   .act--prologue{ top:auto; bottom:calc(var(--pad) * 2.6); transform:none; }
   .act--breath{ top:auto; }
   .act--end{ left:var(--pad); right:var(--pad); width:auto; transform:translateY(-50%); }
-  .scrim, .card.is-prologue .scrim{
+  .scrim, .card--prologue .scrim{
     background:
       linear-gradient(0deg, rgba(10,14,26,.62) 0%, rgba(10,14,26,.28) 38%, transparent 62%),
       linear-gradient(180deg, rgba(10,14,26,.34) 0%, transparent 14%);
@@ -327,7 +367,7 @@ button{ font:inherit; color:inherit; background:none; border:0; padding:0; curso
 /* ── reduced motion: still scroll-driven, never animated ── */
 @media (prefers-reduced-motion: reduce){
   .cue span::after{ animation:none; top:10px; }
-  .pill, .acts button, .scrim{ transition:none; }
+  .pill, .acts button{ transition:none; }
 }
 
 .noscript{
@@ -337,6 +377,4 @@ button{ font:inherit; color:inherit; background:none; border:0; padding:0; curso
 }
 
 /* offscreen holders */
-.vids{ position:absolute; left:0; top:0; width:1px; height:1px; overflow:hidden; opacity:0; pointer-events:none; }
-.vids video{ width:1px; height:1px; }
 .sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }
